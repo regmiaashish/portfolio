@@ -11,6 +11,15 @@
   height: 100vh;
   box-sizing: border-box;
   will-change: transform;
+  background-color: #0b080c;
+  position: relative;
+  z-index: 1;
+}
+
+.work-after {
+  position: relative;
+  z-index: 2;
+  background-color: #0b080c;
 }
 .work-container {
   margin: auto;

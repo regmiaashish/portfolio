@@ -53,21 +53,56 @@ const Work = () => {
           My <span>Work</span>
         </h2>
         <div className="work-flex">
-          {[...Array(6)].map((_value, index) => (
+          {[
+            {
+              name: "Fagoon Upgrade",
+              category: "Open-source AI Platform",
+              tools: "FastAPI, Python, Docker, OpenAI, Gemini, Ollama, Twilio",
+              link: "https://github.com/regmiaashish",
+              image: "/images/fagoon-upgrade.webp",
+            },
+            {
+              name: "Gains Garage Backend",
+              category: "SaaS / GenAI",
+              tools: "FastAPI, NeonDB, PostgreSQL, GCP, GenAI, Stripe",
+              link: "https://github.com/regmiaashish",
+              image: "/images/gains-garage.webp",
+            },
+            {
+              name: "Alliance Backend",
+              category: "AI Calling Platform",
+              tools: "FastAPI, MongoDB, Twilio, ElevenLabs, Stripe, Python",
+              link: "https://github.com/regmiaashish",
+              image: "/images/alliance-backend.webp",
+            },
+            {
+              name: "Jarvis Voice Assistant",
+              category: "Desktop App",
+              tools: "Python, SpeechRecognition, pyttsx3, Web APIs",
+              link: "https://github.com/regmiaashish/jarvis",
+              image: "/images/jarvis.webp",
+            },
+            {
+              name: "Cricket Management System",
+              category: "Web Application",
+              tools: "Python, Django, Django ORM, MySQL, JWT Auth",
+              link: "https://github.com/regmiaashish/cricket-management-system",
+              image: "/images/cricket-management.webp",
+            },
+          ].map((project, index) => (
             <div className="work-box" key={index}>
               <div className="work-info">
                 <div className="work-title">
                   <h3>0{index + 1}</h3>
-
                   <div>
-                    <h4>Project Name</h4>
-                    <p>Category</p>
+                    <h4>{project.name}</h4>
+                    <p>{project.category}</p>
                   </div>
                 </div>
                 <h4>Tools and features</h4>
-                <p>Javascript, TypeScript, React, Threejs</p>
+                <p>{project.tools}</p>
               </div>
-              <WorkImage image="/images/placeholder.webp" alt="" />
+              <WorkImage image={project.image} alt={project.name} link={project.link} />
             </div>
           ))}
         </div>

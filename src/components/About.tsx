@@ -6,9 +6,11 @@ const About = () => {
       <div className="about-me">
         <h3 className="title">About Me</h3>
         <p className="para">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic quis
-          dolores numquam iusto Ratione earum ducimus autem id iure pariatur
-          dolorum quae maiores.
+          Junior Back End Developer @ Fagoon AI building RESTful APIs and
+          backend infrastructure. Former BIM student at Nepal Commerce Campus.
+          Shipped production systems across AI platforms, SaaS, and real
+          estate working with Python, FastAPI, Django, GCP, Docker,
+          PostgreSQL, MongoDB, Twilio, and ElevenLabs.
         </p>
       </div>
     </div>

@@ -11,18 +11,6 @@ import {
   RapierRigidBody,
 } from "@react-three/rapier";
 
-const textureLoader = new THREE.TextureLoader();
-const imageUrls = [
-  "/images/react2.webp",
-  "/images/next2.webp",
-  "/images/node2.webp",
-  "/images/express.webp",
-  "/images/mongo.webp",
-  "/images/mysql.webp",
-  "/images/typescript.webp",
-  "/images/javascript.webp",
-];
-const textures = imageUrls.map((url) => textureLoader.load(url));
 
 const sphereGeometry = new THREE.SphereGeometry(1, 28, 28);
 
@@ -152,18 +140,45 @@ const TechStack = () => {
     };
   }, []);
   const materials = useMemo(() => {
-    return textures.map(
-      (texture) =>
-        new THREE.MeshPhysicalMaterial({
-          map: texture,
-          emissive: "#ffffff",
-          emissiveMap: texture,
-          emissiveIntensity: 0.3,
-          metalness: 0.5,
-          roughness: 1,
-          clearcoat: 0.1,
-        })
-    );
+    const techs = [
+      { name: "Python",     bg: "#3572A5" },
+      { name: "FastAPI",    bg: "#009688" },
+      { name: "Django",     bg: "#092E20" },
+      { name: "PostgreSQL", bg: "#336791" },
+      { name: "MongoDB",    bg: "#13AA52" },
+      { name: "Docker",     bg: "#2496ED" },
+      { name: "GCP",        bg: "#4285F4" },
+      { name: "JavaScript", bg: "#F7DF1E" },
+    ];
+
+    return techs.map(({ name, bg }) => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 256;
+      canvas.height = 256;
+      const ctx = canvas.getContext("2d")!;
+
+      ctx.fillStyle = bg;
+      ctx.beginPath();
+      ctx.arc(128, 128, 128, 0, Math.PI * 2);
+      ctx.fill();
+
+      const textColor = bg === "#F7DF1E" ? "#000000" : "#ffffff";
+      ctx.fillStyle = textColor;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      const fontSize = name.length > 8 ? 28 : 36;
+      ctx.font = `bold ${fontSize}px Arial`;
+      ctx.fillText(name, 128, 128);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      return new THREE.MeshPhysicalMaterial({
+        map: texture,
+        metalness: 0.3,
+        roughness: 0.6,
+        clearcoat: 0.3,
+      });
+    });
   }, []);
 
   return (

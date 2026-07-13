@@ -88,23 +88,26 @@ const WhatIDo = () => {
 
             <div className="what-content-in">
               <h3>DEVELOP</h3>
-              <h4>Description</h4>
+              <h4>Back End Engineering</h4>
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas
-                quia aliquid laboriosam ducimus sit molestiae.
+                I design and build scalable RESTful APIs, backend services, and
+                AI-powered integrations — from stock trading platforms to
+                self-hosted LLM workflows and automated voice calling pipelines.
               </p>
               <h5>Skillset & tools</h5>
               <div className="what-content-flex">
+                <div className="what-tags">Python</div>
+                <div className="what-tags">FastAPI</div>
+                <div className="what-tags">Django</div>
+                <div className="what-tags">PostgreSQL</div>
+                <div className="what-tags">MongoDB</div>
+                <div className="what-tags">Docker</div>
+                <div className="what-tags">GCP</div>
+                <div className="what-tags">Twilio</div>
+                <div className="what-tags">ElevenLabs</div>
+                <div className="what-tags">Meta LLM</div>
                 <div className="what-tags">JavaScript</div>
-                <div className="what-tags">TypeScript</div>
-                <div className="what-tags">Three.js</div>
-                <div className="what-tags">React</div>
-                <div className="what-tags">Css</div>
-                <div className="what-tags">Node.js</div>
-                <div className="what-tags">Next.js</div>
-                <div className="what-tags">Express.js</div>
-                <div className="what-tags">PHP</div>
-                <div className="what-tags">MySql</div>
+                <div className="what-tags">SQL</div>
               </div>
               <div className="what-arrow"></div>
             </div>
@@ -128,22 +131,26 @@ const WhatIDo = () => {
             </div>
             <div className="what-corner"></div>
             <div className="what-content-in">
-              <h3>DESIGN</h3>
-              <h4>Description</h4>
+              <h3>INTEGRATE</h3>
+              <h4>AI & Infrastructure</h4>
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas
-                quia aliquid laboriosam ducimus sit molestiae
+                I integrate GenAI capabilities into production systems — LLM
+                orchestration, voice AI, automated agents, and cloud
+                infrastructure on GCP. Focused on keeping systems reliable,
+                secure, and easy to deploy.
               </p>
               <h5>Skillset & tools</h5>
               <div className="what-content-flex">
-                <div className="what-tags">Blender</div>
-                <div className="what-tags">Zbrush</div>
-                <div className="what-tags">UI Design</div>
-                <div className="what-tags">Motion</div>
-                <div className="what-tags">Rigging</div>
-                <div className="what-tags">3D Animation</div>
-                <div className="what-tags">Character Design</div>
-                <div className="what-tags">Modelling</div>
+                <div className="what-tags">OpenAI</div>
+                <div className="what-tags">Gemini</div>
+                <div className="what-tags">Ollama</div>
+                <div className="what-tags">LangChain</div>
+                <div className="what-tags">NeonDB</div>
+                <div className="what-tags">Stripe</div>
+                <div className="what-tags">JWT</div>
+                <div className="what-tags">REST APIs</div>
+                <div className="what-tags">Pydantic</div>
+                <div className="what-tags">SQLAlchemy</div>
               </div>
               <div className="what-arrow"></div>
             </div>
