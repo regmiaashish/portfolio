@@ -87,8 +87,8 @@ body {
 .split-h2 {
   overflow: hidden;
   display: flex;
-  white-space: nowrap;
-  flex-wrap: nowrap;
+  white-space: normal;
+  flex-wrap: wrap;
 }
 
 .techstack {
@@ -119,5 +119,55 @@ body {
 @media screen and (max-width: 900px) {
   .techstack h2 {
     font-size: 40px;
+    top: 80px;
+  }
+}
+@media screen and (max-width: 480px) {
+  .techstack h2 {
+    font-size: 28px;
+    top: 60px;
+  }
+  .techstack {
+    margin-top: 20px;
+  }
+}
+
+.techstack-mobile {
+  padding: 60px 0px 40px;
+  text-align: center;
+  width: var(--cWidth);
+  max-width: var(--cMaxWidth);
+  margin: auto;
+}
+.techstack-mobile h2 {
+  font-size: 36px;
+  font-weight: 400;
+  text-transform: uppercase;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+}
+.techstack-mobile-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+.techstack-mobile-tag {
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 20px;
+  border-radius: 100px;
+  background-color: rgba(194, 164, 255, 0.1);
+  border: 1px solid rgba(194, 164, 255, 0.3);
+  color: var(--accentColor);
+  letter-spacing: 0.5px;
+}
+@media screen and (max-width: 480px) {
+  .techstack-mobile h2 {
+    font-size: 28px;
+  }
+  .techstack-mobile-tag {
+    font-size: 13px;
+    padding: 7px 16px;
   }
 }

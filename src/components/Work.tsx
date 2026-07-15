@@ -8,6 +8,8 @@ gsap.registerPlugin(useGSAP);
 
 const Work = () => {
   useGSAP(() => {
+  if (window.innerWidth <= 1024) return;
+
   let translateX: number = 0;
 
   function setTranslateX() {
@@ -28,7 +30,7 @@ const Work = () => {
     scrollTrigger: {
       trigger: ".work-section",
       start: "top top",
-      end: `+=${translateX}`, // Use actual scroll width
+      end: `+=${translateX}`,
       scrub: true,
       pin: true,
       id: "work",
@@ -40,7 +42,6 @@ const Work = () => {
     ease: "none",
   });
 
-  // Clean up (optional, good practice)
   return () => {
     timeline.kill();
     ScrollTrigger.getById("work")?.kill();

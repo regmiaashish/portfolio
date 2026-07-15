@@ -165,7 +165,7 @@
 .landing-intro h2 {
   margin: 0;
   color: var(--accentColor);
-  font-size: 22px;
+  font-size: 14px;
   font-weight: 300;
   letter-spacing: 2px;
 }
@@ -173,8 +173,8 @@
 .landing-intro h1 {
   margin: 0;
   letter-spacing: 2px;
-  font-size: 28px;
-  line-height: 28px;
+  font-size: 22px;
+  line-height: 22px;
   font-weight: 500;
   font-family: "Geist", sans-serif;
 }
@@ -192,7 +192,7 @@
   z-index: 9;
 }
 .landing-info h3 {
-  font-size: 22px;
+  font-size: 14px;
   letter-spacing: 2px;
   font-weight: 300;
   color: var(--accentColor);
@@ -200,12 +200,12 @@
 }
 .landing-info h2 {
   margin: 0;
-  margin-top: -20px;
-  margin-left: 20px;
+  margin-top: -14px;
+  margin-left: 12px;
   font-family: "Geist", sans-serif;
   font-weight: 600;
-  font-size: 32px;
-  line-height: 40px;
+  font-size: 22px;
+  line-height: 28px;
   position: relative;
   display: flex;
   flex-wrap: nowrap;
@@ -218,7 +218,7 @@
 }
 h2.landing-info-h2 {
   color: #c481ff;
-  font-size: 42px;
+  font-size: 28px;
   width: 120%;
   margin: 0;
   font-family: "Geist", sans-serif;
@@ -244,6 +244,25 @@ h2.landing-info-h2 {
   top: 0;
   left: 0;
 }
+@media screen and (min-width: 400px) {
+  .landing-intro h2 {
+    font-size: 17px;
+  }
+  .landing-intro h1 {
+    font-size: 26px;
+    line-height: 26px;
+  }
+  .landing-info h3 {
+    font-size: 17px;
+  }
+  .landing-info h2 {
+    font-size: 26px;
+    line-height: 32px;
+  }
+  h2.landing-info-h2 {
+    font-size: 34px;
+  }
+}
 @media screen and (min-width: 500px) {
   .landing-circle2 {
     display: block;
@@ -252,21 +271,21 @@ h2.landing-info-h2 {
     z-index: 0;
   }
   .landing-info h3 {
-    font-size: 18px;
+    font-size: 20px;
   }
   .landing-intro h2 {
-    font-size: 18px;
+    font-size: 20px;
   }
   .landing-intro h1 {
-    font-size: 30px;
-    line-height: 30px;
+    font-size: 32px;
+    line-height: 32px;
   }
   .landing-info h2 {
-    font-size: 35px;
-    line-height: 40px;
+    font-size: 38px;
+    line-height: 42px;
   }
   h2.landing-info-h2 {
-    font-size: 38px;
+    font-size: 42px;
   }
 }
 @media screen and (min-width: 768px) {

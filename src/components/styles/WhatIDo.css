@@ -379,10 +379,45 @@
     place-items: inherit;
     align-items: start;
     justify-content: left;
+    padding: 30px 0px;
   }
   .what-box {
     max-width: calc(100% - 25px);
     margin: 0;
+  }
+  .what-box h2 {
+    font-size: 42px;
+    line-height: 40px;
+    margin: 30px 0;
+  }
+  .what-content {
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  .what-content h3 {
+    font-size: 22px;
+  }
+  .what-content p {
+    font-size: 11px;
+    line-height: 16px;
+  }
+  .what-box:last-child {
+    height: 400px;
+  }
+  .what-box-in {
+    height: 400px;
+  }
+}
+@media only screen and (max-width: 380px) {
+  .what-box h2 {
+    font-size: 34px;
+    line-height: 34px;
+  }
+  .what-box-in {
+    height: 360px;
+  }
+  .what-box:last-child {
+    height: 360px;
   }
 }
 @media only screen and (min-width: 1950px) {

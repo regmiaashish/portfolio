@@ -44,10 +44,19 @@ const MainContainer = ({ children }: PropsWithChildren) => {
             <Career />
             <Work />
             <div className="work-after">
-              {isDesktopView && (
+              {isDesktopView ? (
                 <Suspense fallback={<div>Loading....</div>}>
                   <TechStack />
                 </Suspense>
+              ) : (
+                <div className="techstack-mobile">
+                  <h2>My Techstack</h2>
+                  <div className="techstack-mobile-tags">
+                    {["Python","FastAPI","Django","PostgreSQL","MongoDB","Docker","GCP","JavaScript"].map(t => (
+                      <span key={t} className="techstack-mobile-tag">{t}</span>
+                    ))}
+                  </div>
+                </div>
               )}
               <Contact />
             </div>

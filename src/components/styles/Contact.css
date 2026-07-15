@@ -74,19 +74,39 @@ a.contact-social {
 @media only screen and (max-width: 900px) {
   .contact-flex {
     flex-direction: column;
-    gap: 40px;
+    gap: 30px;
   }
   .contact-flex p {
     margin-bottom: 0px;
   }
   .contact-flex h4 {
-    margin-top: 20px;
+    margin-top: 15px;
   }
   .contact-section {
-    margin-top: 50px;
+    margin-top: 30px;
     padding-bottom: 50px;
   }
   .contact-container {
     width: calc(100% - 25px);
+  }
+}
+@media only screen and (max-width: 600px) {
+  .contact-section h3 {
+    font-size: 28px;
+    line-height: 32px;
+  }
+  .contact-box h2 {
+    font-size: 15px;
+  }
+  a.contact-social {
+    font-size: 18px;
+  }
+  .contact-box h5 {
+    font-size: 15px;
+  }
+}
+@media only screen and (max-width: 380px) {
+  .contact-section h3 {
+    font-size: 22px;
   }
 }
