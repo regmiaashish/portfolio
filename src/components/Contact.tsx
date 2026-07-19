@@ -16,8 +16,13 @@ const Contact = () => {
     setStatus("loading");
     setErrorMsg("");
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || "";
-      const res = await fetch(`${apiUrl}/api/v1/contact`, {
+      // Remove trailing slash from apiUrl if present to avoid double slash
+      const apiUrl = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+      const fullUrl = `${apiUrl}/api/v1/contact`;
+      
+      console.log("Final Fetch URL:", fullUrl);
+
+      const res = await fetch(fullUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
