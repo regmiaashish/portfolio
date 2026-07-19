@@ -39,7 +39,6 @@ React • TypeScript • GSAP • Three.js • WebGL • HTML • CSS • JavaSc
 
 ---
 
-
 ## 🎨 Assets Usage
 
 Some 3D assets included in this repository are free to use for learning purposes.
