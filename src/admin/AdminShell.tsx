@@ -13,6 +13,7 @@ const TABS = [
   { label: "Projects", to: "/admin/projects" },
   { label: "Career", to: "/admin/career" },
   { label: "Skills", to: "/admin/skills" },
+  { label: "Pitch history", to: "/admin/pitches" },
 ];
 
 export function AdminShell({ children }: PropsWithChildren) {

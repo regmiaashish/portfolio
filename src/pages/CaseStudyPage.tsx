@@ -5,7 +5,7 @@ import { Stack } from "../components/layout/Stack";
 import { ButtonAnchor } from "../components/ui/Button";
 import { ChipList } from "../components/ui/Chip";
 import { findProject, useContent } from "../hooks/useContent";
-import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { usePageMeta } from "../hooks/usePageMeta";
 import { NotFoundPage } from "./NotFoundPage";
 import styles from "./Page.module.css";
 
@@ -13,7 +13,7 @@ export function CaseStudyPage() {
   const { slug } = useParams();
   const { content } = useContent();
   const project = findProject(content, slug);
-  useDocumentTitle(project?.name ?? "Project not found");
+  usePageMeta({ title: project?.name ?? "Project not found", description: project?.summary });
 
   if (!project) return <NotFoundPage />;
 
@@ -52,6 +52,9 @@ export function CaseStudyPage() {
             alt={project.image.alt}
             width={project.image.width}
             height={project.image.height}
+            sizes="(min-width: 52rem) 48rem, 100vw"
+            loading="lazy"
+            decoding="async"
           />
         )}
 

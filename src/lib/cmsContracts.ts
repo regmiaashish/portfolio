@@ -34,8 +34,19 @@ export type CareerInput = Schemas["CareerInput"];
 export type SkillGroupInput = Schemas["SkillGroupInput"];
 export type OrderInput = Schemas["OrderInput"];
 export type UploadRequest = Schemas["UploadRequest"];
+/** "project_image" (default) or "resume" (PDF only). */
+export type UploadPurpose = UploadRequest["purpose"];
 /** `POST /api/v1/admin/uploads`: a presigned S3 POST. */
 export type UploadTicket = Schemas["UploadOut"];
 
 /** `GET /api/v1/auth/me` data. */
 export type AdminUser = Pick<Schemas["UserRead"], "id" | "name" | "email" | "is_active" | "is_superuser">;
+
+/** One Pitch Me run, as recorded by the backend when its stream ended. */
+export type PitchOutcome = Schemas["PitchRunSummary"]["outcome"];
+export type PitchRunSummary = Schemas["PitchRunSummary"];
+export type PitchRunDetail = Schemas["PitchRunDetail"];
+/** `GET /api/v1/admin/pitches`: newest first, paginated. */
+export type PitchRunList = Schemas["PitchRunList"];
+/** `GET /api/v1/admin/pitches/stats`. */
+export type PitchStats = Schemas["PitchStats"];

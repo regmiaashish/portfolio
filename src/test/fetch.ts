@@ -2,7 +2,8 @@ import { vi } from "vitest";
 
 import type { Schemas } from "../lib/api";
 
-type Handler = (init: RequestInit | undefined) => Response | Promise<Response>;
+/** `url` lets a handler read the query string (e.g. pagination). */
+type Handler = (init: RequestInit | undefined, url: URL) => Response | Promise<Response>;
 
 export function jsonResponse(status: number, body: unknown, headers: Record<string, string> = {}) {
   return new Response(body === undefined ? null : JSON.stringify(body), {
@@ -21,7 +22,7 @@ export function mockApi(handlers: Record<string, Handler>) {
     const key = `${(init?.method ?? "GET").toUpperCase()} ${url.pathname}`;
     const handler = handlers[key];
     if (!handler) throw new TypeError(`Unmocked request: ${key}`);
-    return handler(init);
+    return handler(init, url);
   });
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;

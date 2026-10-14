@@ -11,6 +11,10 @@ import type {
   AdminSkillGroup,
   AdminUser,
   CareerInput,
+  PitchOutcome,
+  PitchRunDetail,
+  PitchRunList,
+  PitchStats,
   Profile,
   ProjectInput,
   SkillGroupInput,
@@ -145,7 +149,32 @@ export const adminApi = {
 
   presignUpload: (upload: UploadRequest) =>
     adminRequest<UploadTicket>("/api/v1/admin/uploads", { method: "POST", body: upload }),
+
+  pitchStats: (signal?: AbortSignal) =>
+    adminRequest<PitchStats>("/api/v1/admin/pitches/stats", { signal }),
+  listPitches: (query: PitchListQuery, signal?: AbortSignal) =>
+    adminRequest<PitchRunList>(`/api/v1/admin/pitches?${pitchListParams(query)}`, { signal }),
+  getPitch: (id: string, signal?: AbortSignal) =>
+    adminRequest<PitchRunDetail>(`/api/v1/admin/pitches/${encodeURIComponent(id)}`, { signal }),
+  deletePitch: (id: string) =>
+    adminRequest<void>(`/api/v1/admin/pitches/${encodeURIComponent(id)}`, { method: "DELETE" }),
 };
+
+export interface PitchListQuery {
+  limit: number;
+  offset: number;
+  q?: string;
+  outcome?: PitchOutcome;
+}
+
+/** Query string for the pitch list; empty search and filter are left out. */
+export function pitchListParams({ limit, offset, q, outcome }: PitchListQuery): string {
+  const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+  const search = q?.trim();
+  if (search) params.set("q", search);
+  if (outcome) params.set("outcome", outcome);
+  return params.toString();
+}
 
 // --- Direct-to-S3 upload -----------------------------------------------------------
 
@@ -170,9 +199,39 @@ export function uploadToS3(
     };
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) resolve();
-      else reject(new Error(`The upload was rejected (HTTP ${xhr.status}). Please try again.`));
+      else reject(new Error(s3RejectionMessage(xhr.status, xhr.responseText)));
     };
-    xhr.onerror = () => reject(new Error("The upload failed. Check your connection and try again."));
+    // No HTTP response at all: offline, or (most often) the bucket's CORS rules don't allow
+    // this site's origin, so the browser blocks the request before S3 can answer.
+    xhr.onerror = () =>
+      reject(
+        new Error(
+          `The upload couldn't reach S3. Check your connection; if it persists, the bucket's CORS ` +
+            `rules must allow POST from ${window.location.origin}.`,
+        ),
+      );
     xhr.send(form);
   });
+}
+
+const S3_HINTS: Record<string, string> = {
+  AccessDenied: "the AWS key needs s3:PutObject on the upload folder, and the bucket policy must allow it",
+  PermanentRedirect: "AWS_REGION on the server doesn't match the bucket's region",
+  AuthorizationHeaderMalformed: "AWS_REGION on the server doesn't match the bucket's region",
+  SignatureDoesNotMatch: "the AWS secret key on the server is wrong",
+  InvalidAccessKeyId: "the AWS access key on the server is wrong or deleted",
+  EntityTooLarge: "the file is larger than the upload limit",
+  NoSuchBucket: "S3_BUCKET_NAME on the server doesn't exist",
+};
+
+/** Turns S3's XML error body into a message that says what to fix. */
+export function s3RejectionMessage(status: number, body: string): string {
+  const code = /<Code>([^<]+)<\/Code>/.exec(body)?.[1];
+  const detail = /<Message>([^<]+)<\/Message>/.exec(body)?.[1];
+  if (!code) return `The upload was rejected by S3 (HTTP ${status}). Please try again.`;
+  const hint = S3_HINTS[code];
+  return (
+    `S3 rejected the upload: ${code}${detail ? ` (${detail})` : ""}.` +
+    (hint ? ` Likely cause: ${hint}.` : "")
+  );
 }

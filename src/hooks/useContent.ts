@@ -5,8 +5,8 @@ import type { Project, SiteContent } from "../lib/cmsContracts";
 
 export interface ContentContextValue {
   content: SiteContent;
-  /** "snapshot" until (and unless) the API answers with valid content. */
-  source: "snapshot" | "api";
+  /** "snapshot" (bundled) or "cache" (this visitor's last API copy) until the API answers. */
+  source: "snapshot" | "cache" | "api";
 }
 
 export const ContentContext = createContext<ContentContextValue>({

@@ -4,9 +4,11 @@ import {
   type SelectHTMLAttributes,
   type TextareaHTMLAttributes,
   useId,
+  useState,
 } from "react";
 
 import styles from "./Field.module.css";
+import { Icon } from "./Icon";
 
 interface FieldChrome {
   label: ReactNode;
@@ -61,6 +63,45 @@ export function Input({ label, hint, error, id, className, ...rest }: InputProps
         aria-describedby={describedBy(hint, error, ids)}
         {...rest}
       />
+    </Chrome>
+  );
+}
+
+type PasswordInputProps = Omit<InputProps, "type">;
+
+/**
+ * Password field with a show/hide toggle. The toggle is a real button (keyboard reachable,
+ * 44px target) whose name and pressed state tell screen readers what it does.
+ */
+export function PasswordInput({ label, hint, error, id, className, ...rest }: PasswordInputProps) {
+  const ids = useFieldIds(id);
+  const [visible, setVisible] = useState(false);
+  return (
+    <Chrome label={label} hint={hint} error={error} ids={ids}>
+      <div className={styles.passwordWrap}>
+        <input
+          id={ids.controlId}
+          type={visible ? "text" : "password"}
+          className={[styles.control, styles.passwordControl, className].filter(Boolean).join(" ")}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy(hint, error, ids)}
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          {...rest}
+        />
+        <button
+          type="button"
+          className={styles.reveal}
+          onClick={() => setVisible((shown) => !shown)}
+          aria-label={visible ? "Hide password" : "Show password"}
+          aria-pressed={visible}
+          aria-controls={ids.controlId}
+          title={visible ? "Hide password" : "Show password"}
+        >
+          <Icon name={visible ? "eyeOff" : "eye"} />
+        </button>
+      </div>
     </Chrome>
   );
 }

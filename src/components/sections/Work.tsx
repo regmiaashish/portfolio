@@ -25,6 +25,8 @@ export function Work() {
                   alt={project.image.alt}
                   width={project.image.width}
                   height={project.image.height}
+                  // Cards are ~22rem in the 3-column grid, half the width on tablets, full on phones.
+                  sizes="(min-width: 72rem) 22rem, (min-width: 40rem) 45vw, 100vw"
                   loading="lazy"
                   decoding="async"
                 />

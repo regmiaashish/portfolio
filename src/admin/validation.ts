@@ -46,6 +46,7 @@ export const LIMITS = {
 } as const;
 
 export const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/avif"];
+export const RESUME_TYPE = "application/pdf";
 export const DEFAULT_MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -134,6 +135,8 @@ export function validateProfile(profile: Profile): FieldErrors {
       errors["phone.href"] = `The phone link must be ${LIMITS.phoneHref} characters or fewer.`;
     }
   }
+
+  checkUrl(errors, "resume_url", profile.resume_url, "Résumé link");
 
   if (profile.socials.length > LIMITS.socials) {
     errors.socials = `Use at most ${LIMITS.socials} social links.`;
@@ -227,6 +230,18 @@ export function validateImageFile(
   }
   if (file.size > maxBytes) {
     return `The image must be ${Math.floor(maxBytes / (1024 * 1024))} MB or smaller.`;
+  }
+  return null;
+}
+
+/** Null when the file can be uploaded as the résumé, otherwise the reason it can't. */
+export function validateResumeFile(
+  file: Pick<File, "type" | "size">,
+  maxBytes: number = DEFAULT_MAX_UPLOAD_BYTES,
+): string | null {
+  if (file.type !== RESUME_TYPE) return "Upload the résumé as a PDF.";
+  if (file.size > maxBytes) {
+    return `The PDF must be ${Math.floor(maxBytes / (1024 * 1024))} MB or smaller.`;
   }
   return null;
 }

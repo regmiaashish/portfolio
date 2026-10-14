@@ -32,6 +32,15 @@ export function Contact() {
                 </a>
               </li>
             )}
+            {profile.resume_url && (
+              <li>
+                <a href={profile.resume_url} target="_blank" rel="noopener noreferrer">
+                  <Icon name="document" />
+                  Résumé (PDF)
+                  <span className="visually-hidden"> (opens in a new tab)</span>
+                </a>
+              </li>
+            )}
             {profile.socials.map((social) => (
               <li key={social.href}>
                 <a href={social.href} target="_blank" rel="noopener noreferrer">

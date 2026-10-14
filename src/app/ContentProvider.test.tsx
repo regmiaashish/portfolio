@@ -1,8 +1,9 @@
 import { screen, waitFor } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { contentSnapshot } from "../data/snapshot";
 import type { SiteContent } from "../lib/cmsContracts";
+import { CONTENT_CACHE_KEY } from "./ContentProvider";
 import { jsonResponse, mockApi } from "../test/fetch";
 import { renderApp } from "../test/render";
 
@@ -63,3 +64,51 @@ describe("ContentProvider", () => {
   });
 });
 
+
+describe("ContentProvider cache", () => {
+  it("remembers the last API content and starts from it on the next visit", async () => {
+    mockApi({ "GET /api/v1/content": () => jsonResponse(200, API_CONTENT) });
+    const first = renderApp("/");
+    await screen.findByRole("heading", { level: 1, name: "Edited from the admin dashboard." });
+    expect(JSON.parse(localStorage.getItem(CONTENT_CACHE_KEY)!).profile.tagline).toBe(
+      "Edited from the admin dashboard.",
+    );
+    first.unmount();
+
+    // Next visit: the API is slow (never answers here), yet the edited content shows at once.
+    mockApi({ "GET /api/v1/content": () => new Promise<Response>(() => {}) });
+    renderApp("/");
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Edited from the admin dashboard.");
+  });
+
+  it("ignores a corrupt cache entry and uses the snapshot", () => {
+    localStorage.setItem(CONTENT_CACHE_KEY, '{"profile": null');
+    mockApi({ "GET /api/v1/content": () => new Promise<Response>(() => {}) });
+    renderApp("/");
+
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(contentSnapshot.profile.tagline);
+  });
+
+  it("still works when storage is blocked", async () => {
+    const getItem = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new DOMException("blocked", "SecurityError");
+    });
+    const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("blocked", "SecurityError");
+    });
+    mockApi({ "GET /api/v1/content": () => jsonResponse(200, API_CONTENT) });
+    renderApp("/");
+
+    expect(await screen.findByRole("heading", { level: 1, name: "Edited from the admin dashboard." })).toBeInTheDocument();
+    getItem.mockRestore();
+    setItem.mockRestore();
+  });
+
+  it("doesn't cache a failed response", async () => {
+    const fetchMock = mockApi({ "GET /api/v1/content": () => jsonResponse(503, { success: false, message: "x", errors: null }) });
+    renderApp("/");
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    expect(localStorage.getItem(CONTENT_CACHE_KEY)).toBeNull();
+  });
+});

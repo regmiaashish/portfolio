@@ -2,6 +2,9 @@ import react from "@vitejs/plugin-react";
 import { loadEnv } from "vite";
 import { defineConfig } from "vitest/config";
 
+import { normaliseSiteUrl } from "./src/lib/siteMeta";
+import { seoPlugin } from "./vite/seo";
+
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), "VITE_");
 
@@ -14,7 +17,7 @@ export default defineConfig(({ command, mode }) => {
   }
 
   return {
-    plugins: [react()],
+    plugins: [react(), seoPlugin(normaliseSiteUrl(env.VITE_SITE_URL))],
     test: {
       environment: "jsdom",
       setupFiles: ["./src/test/setup.ts"],
