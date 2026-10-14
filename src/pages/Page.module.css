@@ -1,0 +1,40 @@
+.page {
+  padding-block: var(--space-7) var(--space-9);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+}
+
+.meta {
+  margin-top: var(--space-2);
+  color: var(--color-text-muted);
+}
+
+.lead {
+  margin-top: var(--space-5);
+  font-size: var(--text-lg);
+}
+
+.body {
+  margin-top: var(--space-6);
+}
+
+/* Never upscale past the file's real size (that blurs it); shrink to fit narrow screens. */
+.image {
+  width: auto;
+  max-width: min(48rem, 100%);
+  height: auto;
+  margin-top: var(--space-6);
+  border-radius: var(--radius-panel);
+  border: 1px solid var(--color-border);
+}
+
+.notice {
+  margin-top: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface-sunken);
+  border-radius: var(--radius-panel);
+}
