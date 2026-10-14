@@ -1,7 +1,7 @@
 import { useContent } from "../../hooks/useContent";
 import { useVisitorContext } from "../../hooks/useVisitorContext";
-import { buildGreeting, clockIn } from "../../lib/format";
-import { StatusDot } from "../ui/StatusDot";
+import { buildGreeting, clockIn, greetingTags } from "../../lib/format";
+import { StatusLight } from "../console/StatusLight";
 import styles from "./VisitorGreeting.module.css";
 
 const MY_TIMEZONE = "Asia/Kathmandu";
@@ -12,20 +12,27 @@ function fallbackGreeting(myCity: string) {
   return {
     primary: `Namaste from ${myCity}.`,
     secondary: clock ? `It's ${clock} here in Nepal (UTC+5:45).` : null,
+    tags: [myCity.toLowerCase(), ...(clock ? [`${clock} npt`] : [])],
   };
 }
 
 /**
- * The hero's one orchestrated moment: a skeleton while the Context Engine answers,
- * then a greeting personalised to the visitor's city, weather and time zone.
+ * The hero's one orchestrated moment, styled as a console readout: a telemetry line
+ * (live lamp + city, local time, overlap), then the greeting in plain words. A skeleton holds
+ * the space while the Context Engine answers, so nothing below it moves.
  */
 export function VisitorGreeting() {
   const state = useVisitorContext();
   const myCity = useContent().content.profile.location.split(",")[0];
   const loading = state.status === "loading";
+
+  const personal =
+    state.status === "ready" ? buildGreeting(state.data, myCity) : null;
   const greeting = loading
     ? null
-    : (state.status === "ready" ? buildGreeting(state.data, myCity) : null) ?? fallbackGreeting(myCity);
+    : personal
+      ? { ...personal, tags: greetingTags(state.data) }
+      : fallbackGreeting(myCity);
 
   return (
     <div
@@ -43,10 +50,15 @@ export function VisitorGreeting() {
         </>
       ) : (
         <>
-          <p className={styles.primary}>
-            <StatusDot status="live" label="Live:" />
-            <span>{greeting.primary}</span>
+          <p className={`mono ${styles.telemetry}`}>
+            <StatusLight status="live" label="live" />
+            {greeting.tags.map((tag) => (
+              <span key={tag} className={styles.tag}>
+                {tag}
+              </span>
+            ))}
           </p>
+          <p className={styles.primary}>{greeting.primary}</p>
           {greeting.secondary && <p className={styles.secondary}>{greeting.secondary}</p>}
         </>
       )}

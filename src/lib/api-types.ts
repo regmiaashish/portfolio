@@ -53,7 +53,7 @@ export interface paths {
         };
         /**
          * Sitemap
-         * @description Home page plus one URL per published project, with lastmod dates.
+         * @description Home, the top-level pages, /resume when a résumé is set, and every published project.
          */
         get: operations["sitemap_sitemap_xml_get"];
         put?: never;
@@ -133,6 +133,26 @@ export interface paths {
          * @description Everything the public site renders: profile, published projects, career and skills.
          */
         get: operations["public_content_api_v1_content_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/resume/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download Resume
+         * @description Send the visitor to the résumé PDF so the browser saves it.
+         */
+        get: operations["download_resume_api_v1_resume_download_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1491,6 +1511,51 @@ export interface operations {
             };
             /** @description Content not seeded yet */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    download_resume_api_v1_resume_download_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Redirect to the PDF (a short-lived attachment link for uploads) */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No résumé is set */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };

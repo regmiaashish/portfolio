@@ -567,3 +567,13 @@
     justify-items: start;
   }
 }
+
+.resumePreview {
+  display: block;
+  width: 100%;
+  height: min(70vh, 48rem);
+  min-height: 24rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-input);
+  background: var(--color-surface-sunken);
+}

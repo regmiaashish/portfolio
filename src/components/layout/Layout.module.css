@@ -7,13 +7,34 @@
 
 .section {
   padding-block: var(--space-8);
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-panel-border);
+}
+
+.plain {
+  border-top: 0;
+  padding-top: 0;
 }
 
 .sectionHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.sectionTitle {
   display: grid;
   gap: var(--space-3);
-  margin-bottom: var(--space-6);
+}
+
+.label {
+  color: var(--color-telemetry);
+}
+
+.sectionAction {
+  flex: none;
 }
 
 .sectionIntro {

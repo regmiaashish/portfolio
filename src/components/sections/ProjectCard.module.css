@@ -1,0 +1,156 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--color-panel);
+  border: 1px solid var(--color-panel-border);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-panel);
+  overflow: hidden;
+  transition:
+    transform var(--duration-base) var(--ease-emphasis),
+    box-shadow var(--duration-base) var(--ease-emphasis),
+    border-color var(--duration-base) var(--ease-out);
+}
+
+/* Depth on hover and keyboard focus alike. */
+.card:hover,
+.card:focus-within {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lift);
+  border-color: var(--color-border-strong);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 2.25rem;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-panel-header);
+  border-bottom: 1px solid var(--color-panel-border);
+  color: var(--color-telemetry);
+}
+
+.path {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category {
+  flex: none;
+  white-space: nowrap;
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: var(--color-surface-sunken);
+  border-bottom: 1px solid var(--color-panel-border);
+}
+
+.cover {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  aspect-ratio: 16 / 9;
+  padding: var(--space-4);
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-panel-border);
+  background:
+    radial-gradient(18rem 10rem at 85% 0%, var(--color-glow-signal), transparent 70%),
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px),
+    var(--color-panel-header);
+  background-size:
+    auto,
+    16px 16px,
+    16px 16px,
+    auto;
+}
+
+.monogram {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -55%);
+  font-family: var(--font-heading);
+  font-size: 7rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--color-border-strong);
+  opacity: 0.7;
+  transition: transform var(--duration-slow) var(--ease-emphasis);
+}
+
+.card:hover .monogram,
+.card:focus-within .monogram {
+  transform: translate(-50%, -58%) scale(1.04);
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+}
+
+.title {
+  font-size: var(--text-xl);
+}
+
+.title a {
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+/* The whole card is clickable through the title link; the link stays the accessible name. */
+.title a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-panel);
+}
+
+.title a:focus-visible {
+  outline: none;
+}
+
+.title a:focus-visible::after {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.summary {
+  color: var(--color-text-muted);
+}
+
+.footer {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: auto;
+  padding-top: var(--space-2);
+}
+
+.open {
+  color: var(--color-link);
+}
+
+.arrow {
+  display: inline-block;
+  transition: transform var(--duration-base) var(--ease-emphasis);
+}
+
+.card:hover .arrow,
+.card:focus-within .arrow {
+  transform: translateX(4px);
+}

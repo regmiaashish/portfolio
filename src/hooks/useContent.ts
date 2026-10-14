@@ -7,11 +7,14 @@ export interface ContentContextValue {
   content: SiteContent;
   /** "snapshot" (bundled) or "cache" (this visitor's last API copy) until the API answers. */
   source: "snapshot" | "cache" | "api";
+  /** True once the API has answered or failed; false while the first request is in flight. */
+  settled: boolean;
 }
 
 export const ContentContext = createContext<ContentContextValue>({
   content: contentSnapshot,
   source: "snapshot",
+  settled: true,
 });
 
 /** Everything the public site shows. Never empty: falls back to the bundled snapshot. */

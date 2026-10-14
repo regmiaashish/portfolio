@@ -10,6 +10,7 @@ import { useLeaveGuard } from "./unsaved";
 
 const TABS = [
   { label: "Profile", to: "/admin/profile" },
+  { label: "Résumé", to: "/admin/resume" },
   { label: "Projects", to: "/admin/projects" },
   { label: "Career", to: "/admin/career" },
   { label: "Skills", to: "/admin/skills" },

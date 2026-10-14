@@ -17,6 +17,7 @@ import { PitchHistoryPage } from "./pages/PitchHistoryPage";
 import { ProfileEditor } from "./pages/ProfileEditor";
 import { ProjectFormPage } from "./pages/ProjectForm";
 import { ProjectsPage } from "./pages/ProjectsPage";
+import { ResumeAdminPage } from "./pages/ResumeAdminPage";
 import { SkillFormPage, SkillsPage } from "./pages/SkillsPages";
 import { UnsavedContext } from "./unsaved";
 
@@ -30,6 +31,7 @@ function AdminRoutes() {
   return useRoutes([
     { index: true, element: <Navigate to="projects" replace /> },
     { path: "profile", element: <ProfileEditor /> },
+    { path: "resume", element: <ResumeAdminPage /> },
     { path: "projects", element: <ProjectsPage /> },
     { path: "projects/new", element: <ProjectFormPage /> },
     { path: "projects/:id", element: <ProjectFormPage /> },

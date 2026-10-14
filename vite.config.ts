@@ -17,7 +17,7 @@ export default defineConfig(({ command, mode }) => {
   }
 
   return {
-    plugins: [react(), seoPlugin(normaliseSiteUrl(env.VITE_SITE_URL))],
+    plugins: [react(), seoPlugin(normaliseSiteUrl(env.VITE_SITE_URL), env.VITE_API_URL)],
     test: {
       environment: "jsdom",
       setupFiles: ["./src/test/setup.ts"],

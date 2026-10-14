@@ -1,0 +1,33 @@
+.layout {
+  display: grid;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (min-width: 56rem) {
+  .layout {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: var(--space-8);
+  }
+}
+
+.copy {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+}
+
+.summary {
+  font-size: var(--text-lg);
+}
+
+.more {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  font-weight: 600;
+}
+
+.now {
+  color: var(--color-telemetry);
+}

@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { seoTags } from "../../vite/seo";
+import { apiOrigin, seoTags } from "../../vite/seo";
 import { profile } from "../data/profile";
 import { DEFAULT_SITE_URL, normaliseSiteUrl, personJsonLd, scriptJson } from "./siteMeta";
 
@@ -83,5 +83,17 @@ describe("static SEO files", () => {
     }
     expect(() => readFileSync(resolve(publicDir, "og-image.png"))).not.toThrow();
     expect(() => readFileSync(resolve(publicDir, "apple-touch-icon.png"))).not.toThrow();
+  });
+});
+
+describe("apiOrigin", () => {
+  it("reduces the API URL to an origin for the preconnect hint", () => {
+    expect(apiOrigin("https://api.aashish-regmi.com.np/")).toBe("https://api.aashish-regmi.com.np");
+    expect(apiOrigin("http://localhost:8001")).toBe("http://localhost:8001");
+  });
+
+  it("skips the hint when the URL is missing or invalid", () => {
+    expect(apiOrigin(undefined)).toBeNull();
+    expect(apiOrigin("not a url")).toBeNull();
   });
 });

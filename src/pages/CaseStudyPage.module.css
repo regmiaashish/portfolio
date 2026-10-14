@@ -1,0 +1,295 @@
+.page {
+  padding-block: var(--space-6) var(--space-9);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+
+/* --- Header: story on the left, project meta panel on the right ------------------ */
+
+.header {
+  display: grid;
+  gap: var(--space-6);
+  margin-top: var(--space-4);
+  align-items: start;
+}
+
+@media (min-width: 60rem) {
+  .header {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: var(--space-8);
+  }
+}
+
+.path {
+  color: var(--color-telemetry);
+  overflow-wrap: anywhere;
+}
+
+.title {
+  margin-top: var(--space-3);
+  max-width: 18ch;
+}
+
+.category {
+  margin-top: var(--space-3);
+  color: var(--color-text-muted);
+}
+
+.lead {
+  margin-top: var(--space-5);
+  font-size: var(--text-lg);
+  max-width: 58ch;
+}
+
+.links {
+  margin-top: var(--space-6);
+}
+
+.metaBody {
+  display: grid;
+  gap: var(--space-5);
+}
+
+/* --- Media ------------------------------------------------------------------------- */
+
+.media {
+  margin-top: var(--space-8);
+}
+
+.frame {
+  display: inline-block;
+  max-width: 100%;
+}
+
+/* Never upscale past the file's real size (that blurs it); shrink to fit narrow screens. */
+.image {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+}
+
+.cover {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: clamp(12rem, 30vw, 20rem);
+  overflow: hidden;
+  border: 1px solid var(--color-panel-border);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-panel);
+  background:
+    radial-gradient(28rem 14rem at 80% 0%, var(--color-glow-signal), transparent 70%),
+    radial-gradient(20rem 12rem at 10% 100%, var(--color-glow), transparent 70%),
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px),
+    var(--color-panel-header);
+  background-size:
+    auto,
+    auto,
+    24px 24px,
+    24px 24px,
+    auto;
+}
+
+.monogram {
+  font-family: var(--font-heading);
+  font-size: clamp(7rem, 18vw, 12rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--color-border-strong);
+  opacity: 0.75;
+}
+
+/* --- Narrative --------------------------------------------------------------------- */
+
+.story {
+  display: grid;
+  gap: var(--space-7);
+  margin-top: var(--space-8);
+}
+
+@media (min-width: 60rem) {
+  .story {
+    grid-template-columns: 11rem minmax(0, 1fr);
+    gap: var(--space-8);
+  }
+}
+
+.toc {
+  align-self: start;
+}
+
+@media (min-width: 60rem) {
+  .toc {
+    position: sticky;
+    top: calc(var(--header-height) + var(--status-bar-height) + var(--space-5));
+  }
+}
+
+.tocList {
+  display: grid;
+  gap: var(--space-1);
+  padding: 0;
+  margin: var(--space-3) 0 0;
+  list-style: none;
+  border-left: 1px solid var(--color-border);
+}
+
+.tocList a {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding-left: var(--space-4);
+  margin-left: -1px;
+  border-left: 1px solid transparent;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  text-decoration: none;
+}
+
+.tocList a:hover {
+  color: var(--color-text);
+  border-left-color: var(--color-signal);
+}
+
+.tocLabel {
+  color: var(--color-telemetry);
+}
+
+.sections {
+  display: grid;
+  gap: var(--space-7);
+  max-width: 68ch;
+}
+
+.section {
+  display: grid;
+  gap: var(--space-3);
+  scroll-margin-top: calc(var(--header-height) + var(--status-bar-height) + var(--space-5));
+}
+
+.sectionLabel {
+  color: var(--color-telemetry);
+}
+
+/* Narrative headings sit one step below page-level h2s so the story reads, not shouts. */
+.section h2 {
+  font-size: var(--text-xl);
+}
+
+.decisions {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  counter-reset: decision;
+}
+
+.decisions li {
+  position: relative;
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-8);
+  background: var(--color-panel);
+  border: 1px solid var(--color-panel-border);
+  border-radius: var(--radius-panel);
+  counter-increment: decision;
+}
+
+.decisions li::before {
+  content: "d" counter(decision);
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--color-signal);
+}
+
+.resultBody {
+  font-size: var(--text-lg);
+}
+
+/* --- Case study in progress -------------------------------------------------------- */
+
+.pending {
+  margin-top: var(--space-8);
+  max-width: 44rem;
+}
+
+.pendingBody {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.checklist {
+  display: grid;
+  gap: var(--space-2);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  color: var(--color-telemetry);
+}
+
+/* --- Previous / next --------------------------------------------------------------- */
+
+.pager {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-9);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border);
+}
+
+@media (min-width: 40rem) {
+  .pager {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.pagerLink {
+  display: grid;
+  gap: var(--space-1);
+  min-height: 2.75rem;
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-panel);
+  border: 1px solid var(--color-panel-border);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-panel);
+  color: var(--color-text);
+  text-decoration: none;
+  transition:
+    transform var(--duration-base) var(--ease-emphasis),
+    box-shadow var(--duration-base) var(--ease-emphasis),
+    border-color var(--duration-base) var(--ease-out);
+}
+
+.pagerLink:hover,
+.pagerLink:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lift);
+  border-color: var(--color-border-strong);
+}
+
+.pagerNext {
+  text-align: right;
+}
+
+.pagerLabel {
+  color: var(--color-telemetry);
+}
+
+.pagerName {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+}

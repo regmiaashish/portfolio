@@ -151,3 +151,22 @@ export function buildGreeting(context: VisitorContext | null | undefined, myCity
   const secondary = [location, rateSentence(context)].filter(Boolean).join(" ");
   return { primary, secondary };
 }
+
+/**
+ * Short telemetry tags for the greeting's console line, e.g. ["london", "19:30 local",
+ * "3h overlap"]. Only fields that are present produce a tag; never "null" or "NaN".
+ */
+export function greetingTags(context: VisitorContext | null | undefined): string[] {
+  if (!context || typeof context !== "object") return [];
+  const tags: string[] = [];
+  const city = context.city?.trim();
+  if (city) tags.push(city.toLowerCase());
+  const clock = formatClock(context.local_time);
+  if (clock) tags.push(`${clock} local`);
+  const overlap = toNumber(context.timezone_overlap_hours);
+  if (overlap !== null) {
+    const rounded = Math.round(overlap * 2) / 2;
+    tags.push(rounded > 0 ? `${rounded}h overlap` : "no overlap");
+  }
+  return tags;
+}

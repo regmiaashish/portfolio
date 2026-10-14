@@ -7,6 +7,7 @@ import {
   clockIn,
   formatClock,
   formatHours,
+  greetingTags,
   formatMoney,
   timeOfDay,
   toNumber,
@@ -154,5 +155,19 @@ describe("buildGreeting", () => {
     expect(buildGreeting(null, "Kathmandu")).toBeNull();
     // The old backend's shape: no local_time, but a city: still greets by city.
     expect(buildGreeting({ city: "Paris" }, "Kathmandu")?.primary).toBe("Hello to you in Paris.");
+  });
+});
+
+describe("greetingTags", () => {
+  it("builds console tags from the visitor's context", () => {
+    expect(greetingTags(FULL_CONTEXT)).toEqual(["london", "19:30 local", "3h overlap"]);
+  });
+
+  it("reports no overlap and skips missing fields", () => {
+    expect(
+      greetingTags({ ...FULL_CONTEXT, city: null, local_time: null, timezone_overlap_hours: 0 }),
+    ).toEqual(["no overlap"]);
+    expect(greetingTags({ ...FULL_CONTEXT, timezone_overlap_hours: 2.3 })).toContain("2.5h overlap");
+    expect(greetingTags(null)).toEqual([]);
   });
 });

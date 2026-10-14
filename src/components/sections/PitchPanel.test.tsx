@@ -22,19 +22,47 @@ function pitchCalls(fetchMock: ReturnType<typeof stubApi>) {
 }
 
 function panel() {
-  return within(screen.getByRole("complementary", { name: "Pitch me" }));
+  return within(screen.getByRole("region", { name: "Pitch me" }));
+}
+
+function pipelineNode(name: string) {
+  return within(screen.getByRole("list", { name: "Agent pipeline" })).getByText(name).closest("li")!;
 }
 
 describe("PitchPanel with VITE_PITCH_ENABLED unset (shipped dark)", () => {
   it("keeps the disabled coming-soon panel and never calls the pitch endpoint", async () => {
     const fetchMock = stubApi(() => sseResponse(happyPathEvents()));
-    renderApp();
+    renderApp("/pitch");
 
     expect(panel().getByRole("button", { name: "Pitch me (coming soon)" })).toBeDisabled();
     expect(panel().getByLabelText("Company")).toBeDisabled();
     expect(panel().getByLabelText("Role")).toBeDisabled();
     expect(panel().getByText(/Coming soon\./)).toBeInTheDocument();
     expect(pitchCalls(fetchMock)).toHaveLength(0);
+  });
+
+  it("shows the pipeline at rest and explains the guardrails", () => {
+    stubApi(() => sseResponse(happyPathEvents()));
+    renderApp("/pitch");
+
+    for (const agent of ["Researcher", "Matchmaker", "Writer"]) {
+      expect(pipelineNode(agent)).toHaveTextContent("idle");
+      expect(pipelineNode(agent)).toHaveAttribute("data-state", "idle");
+    }
+    const guardrails = panel().getByRole("region", { name: "How it works" });
+    expect(guardrails).toHaveTextContent("3 runs per minute per visitor");
+    expect(guardrails).toHaveTextContent("daily cap");
+    expect(guardrails).toHaveTextContent("No IP addresses");
+  });
+
+  it("has one h1 and no duplicated panel heading", () => {
+    stubApi(() => sseResponse(happyPathEvents()));
+    renderApp("/pitch");
+
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Pitch Me");
+    expect(screen.queryByRole("heading", { level: 2, name: "Pitch me" })).not.toBeInTheDocument();
+    expect(panel().getByRole("heading", { level: 2, name: "Your request" })).toBeInTheDocument();
   });
 });
 
@@ -43,7 +71,7 @@ describe("PitchPanel with VITE_PITCH_ENABLED=true", () => {
     vi.stubEnv("VITE_PITCH_ENABLED", "true");
     const fetchMock = stubApi(() => sseResponse(happyPathEvents()));
     const user = userEvent.setup();
-    renderApp();
+    renderApp("/pitch");
 
     await user.type(panel().getByLabelText("Company"), "<script>");
     await user.click(panel().getByRole("button", { name: "Pitch me" }));
@@ -59,7 +87,7 @@ describe("PitchPanel with VITE_PITCH_ENABLED=true", () => {
     const fetchMock = stubApi(() => sseResponse(happyPathEvents()));
     const user = userEvent.setup();
     const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue();
-    renderApp();
+    renderApp("/pitch");
 
     await user.type(panel().getByLabelText("Company"), "Spotify");
     await user.type(panel().getByLabelText("Role"), "Backend");
@@ -73,6 +101,10 @@ describe("PitchPanel with VITE_PITCH_ENABLED=true", () => {
     for (const agent of ["Researcher", "Matchmaker", "Writer"]) {
       expect(panel().getByText(agent).closest("li")).toHaveTextContent("done");
     }
+    // Every connector is lit once the run has finished.
+    expect(pipelineNode("Researcher")).toHaveAttribute("data-link", "lit");
+    expect(pipelineNode("Matchmaker")).toHaveAttribute("data-link", "lit");
+    expect(pipelineNode("Writer")).not.toHaveAttribute("data-link");
     const url = new URL(String(pitchCalls(fetchMock)[0][0]));
     expect(url.searchParams.get("company")).toBe("Spotify");
     expect(url.searchParams.has("turnstile_token")).toBe(false);
@@ -86,7 +118,7 @@ describe("PitchPanel with VITE_PITCH_ENABLED=true", () => {
     vi.stubEnv("VITE_PITCH_ENABLED", "true");
     stubApi(() => sseResponse(happyPathEvents("Cached pitch.", true)));
     const user = userEvent.setup();
-    renderApp();
+    renderApp("/pitch");
 
     await user.type(panel().getByLabelText("Company"), "Spotify");
     await user.type(panel().getByLabelText("Role"), "Backend");
@@ -105,7 +137,7 @@ describe("PitchPanel with VITE_PITCH_ENABLED=true", () => {
       }),
     );
     const user = userEvent.setup();
-    renderApp();
+    renderApp("/pitch");
 
     await user.type(panel().getByLabelText("Company"), "Spotify");
     await user.type(panel().getByLabelText("Role"), "Backend");
@@ -123,7 +155,7 @@ describe("PitchPanel with VITE_PITCH_ENABLED=true", () => {
     stubApi(() => sseResponse(happyPathEvents()));
     const user = userEvent.setup();
     vi.spyOn(navigator.clipboard, "writeText").mockRejectedValue(new Error("denied"));
-    renderApp();
+    renderApp("/pitch");
 
     await user.type(panel().getByLabelText("Company"), "Spotify");
     await user.type(panel().getByLabelText("Role"), "Backend");
