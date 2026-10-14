@@ -8,6 +8,7 @@ import {
   formatClock,
   formatHours,
   greetingTags,
+  sameTimeZone,
   formatMoney,
   timeOfDay,
   toNumber,
@@ -169,5 +170,51 @@ describe("greetingTags", () => {
     ).toEqual(["no overlap"]);
     expect(greetingTags({ ...FULL_CONTEXT, timezone_overlap_hours: 2.3 })).toContain("2.5h overlap");
     expect(greetingTags(null)).toEqual([]);
+  });
+});
+
+describe("same time zone", () => {
+  const kathmandu = {
+    city: "Kathmandu",
+    local_time: "2026-10-14T21:50:00+05:45",
+    my_timezone: "Asia/Kathmandu",
+    my_local_time: "2026-10-14T21:50:00+05:45",
+    timezone_overlap_hours: 9,
+    weather: { description: "clear skies", temperature_c: 18 },
+  } as VisitorContext;
+
+  it("says 'too' instead of an overlap for a visitor in my city", () => {
+    const greeting = buildGreeting(kathmandu, "Kathmandu");
+
+    expect(greeting?.secondary).toBe("I'm in Kathmandu too, so we share the whole working day.");
+    expect(greeting?.secondary).not.toContain("overlap");
+    expect(greetingTags(kathmandu)).toContain("same time zone");
+    expect(greetingTags(kathmandu).join(" ")).not.toContain("9h overlap");
+  });
+
+  it("says 'same time zone' for another city on my clock", () => {
+    const pokhara = { ...kathmandu, city: "Pokhara" } as VisitorContext;
+
+    expect(buildGreeting(pokhara, "Kathmandu")?.secondary).toBe(
+      "We're in the same time zone, so we share the whole working day.",
+    );
+  });
+
+  it("keeps the overlap wording when offsets differ", () => {
+    const london = {
+      ...kathmandu,
+      city: "London",
+      local_time: "2026-10-14T17:05:00+01:00",
+      timezone_overlap_hours: 4.5,
+    } as VisitorContext;
+
+    expect(sameTimeZone(london)).toBe(false);
+    expect(buildGreeting(london, "Kathmandu")?.secondary).toContain("overlap by about 4.5 hours");
+  });
+
+  it("treats Z and +00:00 as the same offset", () => {
+    expect(
+      sameTimeZone({ local_time: "2026-01-01T10:00:00Z", my_local_time: "2026-01-01T15:45:00+00:00" } as VisitorContext),
+    ).toBe(true);
   });
 });

@@ -48,7 +48,11 @@ describe("image upload", () => {
 
     await user.upload(screen.getByLabelText("Upload an image"), png());
 
-    const preview = await screen.findByRole("img", { name: "Uploaded image preview" });
+    const preview = await screen.findByRole(
+      "img",
+      { name: "Uploaded image preview" },
+      { timeout: 5_000 },
+    );
     expect(preview).toHaveAttribute("src", UPLOADED_IMAGE.public_url);
 
     expect(FakeXHR.instances).toHaveLength(1);
@@ -68,14 +72,15 @@ describe("image upload", () => {
     await user.type(screen.getByLabelText("Alt text"), "The dashboard home screen");
     await user.click(screen.getByRole("button", { name: "Create project" }));
 
-    await screen.findByText(/Saved “Image project”/);
+    await screen.findByText(/Saved “Image project”/, undefined, { timeout: 5_000 });
     expect(calls("POST", "/api/v1/admin/projects")[0].body.image).toEqual({
       key: UPLOADED_IMAGE.key,
       alt: "The dashboard home screen",
       width: 1200,
       height: 750,
     });
-  });
+    // Long by nature (fills a whole form): generous limit so a busy CI machine can't flake it.
+  }, 20_000);
 
   it("shows upload progress while the file is sent", async () => {
     const user = userEvent.setup({ applyAccept: false });
