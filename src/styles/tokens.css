@@ -1,0 +1,121 @@
+/*
+ * Design tokens. Every colour pair used for text or UI is checked for WCAG AA
+ * contrast by src/styles/contrast.test.ts. Change a value, run `npm test`.
+ *
+ * Palette: ink navy + Kathmandu marigold. Marigold is the single accent, used as a
+ * fill (primary button, live indicator), never as small text on light surfaces.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Colour: light theme */
+  --color-bg: #f4f6f8; /* snow */
+  --color-surface: #ffffff;
+  --color-surface-sunken: #dce6f0; /* glacier */
+  --color-text: #0f1e33; /* ink */
+  --color-text-muted: #475569;
+  --color-border: #c3cfdc; /* decorative dividers */
+  --color-border-strong: #7d8da1; /* input and control outlines (3:1) */
+  --color-accent: #e8a317; /* marigold, as a fill */
+  --color-accent-contrast: #0f1e33; /* text on the accent fill */
+  --color-accent-hover: #d69210;
+  --color-focus: #9a6100; /* deep marigold focus ring (3:1 on light surfaces) */
+  --color-live: #9a6100;
+  --color-link: #2447d1; /* signal blue, darkened for text */
+  --color-signal: #2e5bff; /* "running" state dot */
+  --color-ok: #178a5b; /* 3:1 even on the sunken panel */
+  --color-ok-text: #157552;
+  --color-err: #d64545;
+  --color-err-text: #b42f2f;
+
+  /* Typography */
+  --font-heading: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Public Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  /* Scale 14 / 17 / 21 / 28 / 40 / 64, headings fluid between mobile and desktop */
+  --text-sm: 0.875rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.3125rem;
+  --text-xl: clamp(1.375rem, 1.1rem + 1.1vw, 1.75rem);
+  --text-2xl: clamp(1.75rem, 1.2rem + 2.2vw, 2.5rem);
+  --text-3xl: clamp(2.25rem, 1.2rem + 4.4vw, 4rem);
+  --leading-body: 1.6;
+  --leading-tight: 1.15;
+  --measure: 68ch;
+
+  /* Spacing (4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+
+  /* Radius with intent: inputs, panels, pills */
+  --radius-input: 4px;
+  --radius-panel: 8px;
+  --radius-pill: 999px;
+
+  /* Layout */
+  --container-max: 72rem;
+  --gutter: clamp(1rem, 0.6rem + 2vw, 2rem);
+  --header-height: 4rem;
+
+  /* Motion */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Dark theme: follows the system unless the visitor picked light explicitly... */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --color-bg: #0b1524;
+    --color-surface: #13213a;
+    --color-surface-sunken: #0e1a2e;
+    --color-text: #e8edf3;
+    --color-text-muted: #a3b1c4;
+    --color-border: #2a3b58;
+    --color-border-strong: #5b6e8c;
+    --color-accent: #f2b53a;
+    --color-accent-contrast: #0b1524;
+    --color-accent-hover: #f6c45e;
+    --color-focus: #f2b53a;
+    --color-live: #f2b53a;
+    --color-link: #8fa8ff;
+    --color-signal: #8fa8ff;
+    --color-ok: #3cc48e;
+    --color-ok-text: #3cc48e;
+    --color-err: #f07a7a;
+    --color-err-text: #f07a7a;
+  }
+}
+
+/* ...or picked dark explicitly. Keep in sync with the block above. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #0b1524;
+  --color-surface: #13213a;
+  --color-surface-sunken: #0e1a2e;
+  --color-text: #e8edf3;
+  --color-text-muted: #a3b1c4;
+  --color-border: #2a3b58;
+  --color-border-strong: #5b6e8c;
+  --color-accent: #f2b53a;
+  --color-accent-contrast: #0b1524;
+  --color-accent-hover: #f6c45e;
+  --color-focus: #f2b53a;
+  --color-live: #f2b53a;
+  --color-link: #8fa8ff;
+  --color-signal: #8fa8ff;
+  --color-ok: #3cc48e;
+  --color-ok-text: #3cc48e;
+  --color-err: #f07a7a;
+  --color-err-text: #f07a7a;
+}

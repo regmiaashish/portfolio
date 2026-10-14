@@ -1,0 +1,65 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  position: relative;
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.card:hover {
+  border-color: var(--color-border-strong);
+}
+
+.image {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: var(--radius-input);
+  background: var(--color-surface-sunken);
+}
+
+.category {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.title a {
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+/* The whole card is clickable through the title link; the link stays the accessible name. */
+.title a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-panel);
+}
+
+.title a:focus-visible {
+  outline: none;
+}
+
+.title a:focus-visible::after {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.summary {
+  color: var(--color-text-muted);
+}
+
+.stack {
+  margin-top: auto;
+}
+
+.list {
+  padding: 0;
+  list-style: none;
+}

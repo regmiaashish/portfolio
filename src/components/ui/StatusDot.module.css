@@ -1,0 +1,40 @@
+.dot {
+  display: inline-block;
+  flex: none;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--color-border-strong);
+  background: transparent;
+}
+
+.done {
+  background: var(--color-ok);
+  border-color: var(--color-ok);
+}
+
+.error {
+  background: var(--color-err);
+  border-color: var(--color-err);
+}
+
+.running {
+  background: var(--color-signal);
+  border-color: var(--color-signal);
+  animation: pulse 1.4s var(--ease-out) infinite;
+}
+
+.live {
+  background: var(--color-live);
+  border-color: var(--color-live);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-signal) 45%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 0.35rem transparent;
+  }
+}

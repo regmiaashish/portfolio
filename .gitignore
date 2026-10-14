@@ -27,3 +27,5 @@ dist-ssr
 backup/
 .env
 .env.production
+# TypeScript incremental build info
+*.tsbuildinfo

@@ -1,0 +1,30 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+}
+
+.main:focus {
+  outline: none;
+}
+
+.skipLink {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: 100;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+  font-weight: 600;
+  border-radius: var(--radius-input);
+  transform: translateY(-200%);
+}
+
+.skipLink:focus {
+  transform: none;
+}
