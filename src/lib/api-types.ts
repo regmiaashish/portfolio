@@ -55,7 +55,7 @@ export interface paths {
         put?: never;
         /**
          * Contact
-         * @description Endpoint to handle contact form submissions.
+         * @description Store the message, then email it after responding (202: accepted, not yet sent).
          */
         post: operations["contact_api_v1_contact_post"];
         delete?: never;
@@ -206,16 +206,25 @@ export interface components {
         ContactRequest: {
             /**
              * Name
-             * @description Visitor's full nam
+             * @description Visitor's name
              */
             name: string;
             /**
              * Email
              * Format: email
+             * @description Address to reply to
              */
             email: string;
             /** Message */
             message: string;
+            /**
+             * Website
+             * @description Leave empty.
+             * @default
+             */
+            website: string;
+            /** Turnstile Token */
+            turnstile_token?: string | null;
         };
         /** ErrorResponse */
         ErrorResponse: {
@@ -301,6 +310,66 @@ export interface components {
             /** Updated At */
             updated_at?: string | null;
         };
+        /**
+         * VisitorContext
+         * @description What the hero greeting knows about the visitor. Every field degrades to null.
+         */
+        VisitorContext: {
+            /** City */
+            city?: string | null;
+            /** Country */
+            country?: string | null;
+            /** Country Code */
+            country_code?: string | null;
+            /** Timezone */
+            timezone?: string | null;
+            /** Local Time */
+            local_time?: string | null;
+            /** Utc Offset Minutes */
+            utc_offset_minutes?: number | null;
+            weather?: components["schemas"]["WeatherContext"] | null;
+            /** Currency Code */
+            currency_code?: string | null;
+            /** Currency Symbol */
+            currency_symbol?: string | null;
+            /**
+             * Base Currency
+             * @default GBP
+             * @constant
+             */
+            base_currency: "GBP";
+            /** Conversion Rate */
+            conversion_rate?: number | null;
+            /** Hourly Rate Gbp */
+            hourly_rate_gbp?: number | null;
+            /** Hourly Rate Local */
+            hourly_rate_local?: number | null;
+            /**
+             * My Timezone
+             * @default Asia/Kathmandu
+             * @constant
+             */
+            my_timezone: "Asia/Kathmandu";
+            /** My Local Time */
+            my_local_time: string;
+            /** Timezone Overlap Hours */
+            timezone_overlap_hours?: number | null;
+        };
+        /** WeatherContext */
+        WeatherContext: {
+            /** Temperature C */
+            temperature_c?: number | null;
+            /** Apparent Temperature C */
+            apparent_temperature_c?: number | null;
+            /** Precipitation Mm */
+            precipitation_mm?: number | null;
+            /** Weather Code */
+            weather_code?: number | null;
+            /** Description */
+            description?: string | null;
+            /** Is Day */
+            is_day?: boolean | null;
+        };
     };
     responses: never;
     parameters: never;
@@ -373,7 +442,7 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            200: {
+            202: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -381,8 +450,26 @@ export interface operations {
                     "application/json": components["schemas"]["APIResponse"];
                 };
             };
+            /** @description Turnstile verification failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation error */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Too many messages */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -404,7 +491,7 @@ export interface operations {
     visitor_context_api_v1_context_get: {
         parameters: {
             query?: {
-                /** @description Visitor IPv4 or IPv6 address. */
+                /** @description Override the visitor IP for testing. Ignored in production. */
                 ip?: string | null;
             };
             header?: never;
@@ -419,7 +506,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["VisitorContext"];
+                };
+            };
+            /** @description IP cannot be geolocated */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Validation error */
@@ -431,8 +527,26 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description Too many requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Internal server error */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Geolocation unavailable */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -1,17 +1,45 @@
+.layout {
+  display: grid;
+  gap: var(--space-7);
+}
+
+@media (min-width: 56rem) {
+  .layout {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: var(--space-8);
+  }
+}
+
+.direct {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+}
+
+.directTitle {
+  font-size: var(--text-lg);
+}
+
 .email {
   display: inline-flex;
   align-items: center;
   gap: var(--space-3);
   font-family: var(--font-heading);
-  font-size: var(--text-xl);
+  font-size: var(--text-base);
   font-weight: 700;
   overflow-wrap: anywhere;
 }
 
+@media (min-width: 30rem) {
+  .email {
+    font-size: var(--text-lg);
+  }
+}
+
 .details {
   display: grid;
-  gap: var(--space-3);
-  margin-top: var(--space-6);
+  gap: var(--space-2);
+  margin-top: var(--space-3);
   padding: 0;
   list-style: none;
 }

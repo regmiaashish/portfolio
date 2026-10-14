@@ -1,0 +1,77 @@
+.form {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.row {
+  display: grid;
+  gap: var(--space-5);
+}
+
+@media (min-width: 40rem) {
+  .row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/*
+ * Honeypot. Bots fill every field; people never see this one. It is moved off-screen
+ * (not just visually hidden) and removed from the tab order and the accessibility tree.
+ */
+.honeypot {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.alert {
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-err);
+  background: var(--color-surface);
+  color: var(--color-err-text);
+  border-radius: var(--radius-input);
+}
+
+.alert a {
+  color: inherit;
+}
+
+.success {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-ok);
+  border-radius: var(--radius-panel);
+}
+
+.success:focus {
+  outline: none;
+}
+
+.success:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.successTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-lg);
+}
+
+.turnstile {
+  min-height: 65px; /* the widget's height, reserved so the button doesn't jump */
+}
