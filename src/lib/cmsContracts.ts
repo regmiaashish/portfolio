@@ -50,3 +50,15 @@ export type PitchRunDetail = Schemas["PitchRunDetail"];
 export type PitchRunList = Schemas["PitchRunList"];
 /** `GET /api/v1/admin/pitches/stats`. */
 export type PitchStats = Schemas["PitchStats"];
+
+// --- Contact messages (Phase 6.3) ---------------------------------------------------
+/** Notification email delivery for a contact message. */
+export type MessageStatus = Schemas["MessageSummary"]["status"];
+/** A row in `GET /api/v1/admin/messages`. `preview` is the first 160 characters. */
+export type MessageSummary = Schemas["MessageSummary"];
+/** `GET /api/v1/admin/messages/{id}`, and the result of PATCH and retry. */
+export type MessageDetail = Schemas["MessageDetail"];
+/** `GET /api/v1/admin/messages`: newest first, paginated. */
+export type MessageList = Schemas["MessageList"];
+/** `GET /api/v1/admin/messages/stats`. */
+export type MessageStats = Schemas["MessageStats"];

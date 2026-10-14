@@ -18,6 +18,10 @@ import type {
   AdminSkillGroup,
   AdminUser,
   CareerInput,
+  MessageDetail,
+  MessageList,
+  MessageStats,
+  MessageStatus,
   PitchOutcome,
   PitchRunDetail,
   PitchRunList,
@@ -168,6 +172,24 @@ export const adminApi = {
     adminRequest<PitchRunDetail>(`/api/v1/admin/pitches/${encodeURIComponent(id)}`, { signal }),
   deletePitch: (id: string) =>
     adminRequest<void>(`/api/v1/admin/pitches/${encodeURIComponent(id)}`, { method: "DELETE" }),
+
+  messageStats: (signal?: AbortSignal) =>
+    adminRequest<MessageStats>("/api/v1/admin/messages/stats", { signal }),
+  listMessages: (query: MessageListQuery, signal?: AbortSignal) =>
+    adminRequest<MessageList>(`/api/v1/admin/messages?${messageListParams(query)}`, { signal }),
+  getMessage: (id: string, signal?: AbortSignal) =>
+    adminRequest<MessageDetail>(`/api/v1/admin/messages/${encodeURIComponent(id)}`, { signal }),
+  setMessageRead: (id: string, read: boolean) =>
+    adminRequest<MessageDetail>(`/api/v1/admin/messages/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: { read },
+    }),
+  retryMessage: (id: string) =>
+    adminRequest<MessageDetail>(`/api/v1/admin/messages/${encodeURIComponent(id)}/retry`, {
+      method: "POST",
+    }),
+  deleteMessage: (id: string) =>
+    adminRequest<void>(`/api/v1/admin/messages/${encodeURIComponent(id)}`, { method: "DELETE" }),
 };
 
 export interface PitchListQuery {
@@ -183,6 +205,24 @@ export function pitchListParams({ limit, offset, q, outcome }: PitchListQuery): 
   const search = q?.trim();
   if (search) params.set("q", search);
   if (outcome) params.set("outcome", outcome);
+  return params.toString();
+}
+
+export interface MessageListQuery {
+  limit: number;
+  offset: number;
+  q?: string;
+  status?: MessageStatus;
+  unread?: boolean;
+}
+
+/** Query string for the message list; empty search and filters are left out. */
+export function messageListParams({ limit, offset, q, status, unread }: MessageListQuery): string {
+  const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+  const search = q?.trim();
+  if (search) params.set("q", search);
+  if (status) params.set("status", status);
+  if (unread) params.set("unread", "true");
   return params.toString();
 }
 
