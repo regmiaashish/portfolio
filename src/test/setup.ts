@@ -33,6 +33,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
   cleanup();
   localStorage.clear();
   document.documentElement.removeAttribute("data-theme");

@@ -76,6 +76,25 @@ async function readBody(response: Response): Promise<unknown> {
   }
 }
 
+/** Builds the ApiError for a non-2xx response (shared by request() and streaming callers). */
+export async function apiErrorFromResponse(response: Response): Promise<ApiError> {
+  const data = await readBody(response);
+  return new ApiError(response.status, messageFrom(data, response.status), errorsFrom(data));
+}
+
+/** The machine-readable `errors.code` the backend attaches to some errors, if any. */
+export function errorCode(error: ApiError): string | undefined {
+  const errors = error.errors;
+  if (errors && !Array.isArray(errors) && typeof errors === "object") {
+    const code = (errors as Record<string, unknown>).code;
+    if (typeof code === "string") return code;
+  }
+  return undefined;
+}
+
+/** The message shown when the request never reached the server. */
+export const NETWORK_ERROR_MESSAGE = fallbackMessage(0);
+
 export interface RequestOptions {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;
@@ -108,9 +127,6 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
     throw new ApiError(0, fallbackMessage(0));
   }
 
-  const data = await readBody(response);
-  if (!response.ok) {
-    throw new ApiError(response.status, messageFrom(data, response.status), errorsFrom(data));
-  }
-  return data as T;
+  if (!response.ok) throw await apiErrorFromResponse(response);
+  return (await readBody(response)) as T;
 }

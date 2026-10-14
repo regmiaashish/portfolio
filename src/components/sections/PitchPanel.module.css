@@ -51,3 +51,91 @@
   font-family: var(--font-mono);
   font-size: var(--text-sm);
 }
+
+.turnstile {
+  min-height: 65px; /* the widget's height, reserved so the form doesn't jump */
+}
+
+.error {
+  color: var(--color-err-text);
+  font-size: var(--text-sm);
+}
+
+.note {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+/* Appended below the agents, so the inputs never move when a run starts. */
+.results {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.log {
+  max-height: 9rem;
+  overflow-y: auto;
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  list-style: none;
+  background: var(--color-surface-sunken);
+  border-radius: var(--radius-input);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.logAgent {
+  color: var(--color-text-muted);
+}
+
+.outputBlock {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.outputHeading {
+  font-size: var(--text-base);
+}
+
+.output {
+  min-height: 6.5rem;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-input);
+  white-space: pre-wrap;
+}
+
+.waiting {
+  color: var(--color-text-muted);
+}
+
+.caret {
+  display: inline-block;
+  width: 0.55ch;
+  height: 1.1em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: var(--color-text);
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caret {
+    display: none;
+  }
+}
+
+.outputActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
