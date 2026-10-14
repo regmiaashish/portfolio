@@ -118,6 +118,22 @@ export interface Greeting {
   secondary: string | null;
 }
 
+const UTC_OFFSET = /(Z|[+-]\d{2}:?\d{2})$/;
+
+function offsetOf(iso: string | null | undefined): string | null {
+  const match = iso ? UTC_OFFSET.exec(iso.trim()) : null;
+  if (!match) return null;
+  return match[1] === "Z" ? "+00:00" : match[1].replace(/^([+-]\d{2})(\d{2})$/, "$1:$2");
+}
+
+/** True when the visitor's clock and mine have the same UTC offset right now. */
+export function sameTimeZone(context: VisitorContext | null | undefined): boolean {
+  if (!context) return false;
+  const theirs = offsetOf(context.local_time);
+  const mine = offsetOf(context.my_local_time);
+  return theirs !== null && theirs === mine;
+}
+
 /**
  * Builds the hero greeting from whatever context is available.
  * Returns null when there is nothing personal to say (the caller shows the generic greeting).
@@ -139,6 +155,14 @@ export function buildGreeting(context: VisitorContext | null | undefined, myCity
   const me = cityFromTimezone(context.my_timezone) ?? myCity;
   const myClock = formatClock(context.my_local_time);
   const overlap = toNumber(context.timezone_overlap_hours);
+  if (sameTimeZone(context)) {
+    // "We overlap 9 hours" is odd when we share a clock; say so plainly instead.
+    const together =
+      city && city.toLowerCase() === me.toLowerCase()
+        ? `I'm in ${me} too, so we share the whole working day.`
+        : "We're in the same time zone, so we share the whole working day.";
+    return { primary, secondary: [together, rateSentence(context)].filter(Boolean).join(" ") };
+  }
   let location = myClock ? `I'm in ${me}, where it's ${myClock}` : `I'm in ${me}`;
   if (overlap !== null && overlap > 0) {
     location += `, so our working days overlap by about ${formatHours(overlap)}.`;
@@ -164,7 +188,9 @@ export function greetingTags(context: VisitorContext | null | undefined): string
   const clock = formatClock(context.local_time);
   if (clock) tags.push(`${clock} local`);
   const overlap = toNumber(context.timezone_overlap_hours);
-  if (overlap !== null) {
+  if (sameTimeZone(context)) {
+    tags.push("same time zone");
+  } else if (overlap !== null) {
     const rounded = Math.round(overlap * 2) / 2;
     tags.push(rounded > 0 ? `${rounded}h overlap` : "no overlap");
   }
