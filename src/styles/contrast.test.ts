@@ -51,6 +51,14 @@ const TEXT_PAIRS: [string, string][] = [
   ["color-err-text", "color-surface"],
   ["color-accent-contrast", "color-accent"],
   ["color-accent-contrast", "color-accent-hover"],
+  ["color-text", "color-panel"],
+  ["color-text", "color-panel-header"],
+  ["color-text-muted", "color-panel"],
+  ["color-text-muted", "color-panel-header"],
+  ["color-telemetry", "color-panel"],
+  ["color-telemetry", "color-panel-header"],
+  ["color-telemetry", "color-bg"],
+  ["color-link", "color-panel"],
 ];
 
 const UI_PAIRS: [string, string][] = [
@@ -62,6 +70,11 @@ const UI_PAIRS: [string, string][] = [
   ["color-signal", "color-surface-sunken"],
   ["color-ok", "color-surface-sunken"],
   ["color-err", "color-surface-sunken"],
+  ["color-border-strong", "color-panel"],
+  ["color-focus", "color-panel"],
+  ["color-live", "color-panel-header"],
+  ["color-signal", "color-panel"],
+  ["color-ok", "color-panel"],
 ];
 
 describe.each([

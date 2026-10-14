@@ -71,7 +71,7 @@ export function ResumeField({ value, onChange, error }: ResumeFieldProps) {
     <div className={styles.imageBox}>
       <Input
         label="Résumé link"
-        hint="Shown as “Résumé (PDF)” on the home page and in Contact. Leave empty to hide it."
+        hint="Shown on the public Résumé page, with a download button. Leave empty to hide it."
         type="url"
         value={value ?? ""}
         maxLength={LIMITS.url}

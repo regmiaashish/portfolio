@@ -31,7 +31,7 @@ describe("usePageMeta", () => {
   it("follows client-side navigation to a case study", async () => {
     const user = userEvent.setup();
     const project = contentSnapshot.projects.find((p) => p.slug === "jarvis")!;
-    renderApp("/");
+    renderApp("/work");
 
     await user.click(screen.getByRole("link", { name: project.name }));
 

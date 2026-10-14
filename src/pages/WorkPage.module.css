@@ -1,0 +1,25 @@
+.readouts {
+  max-width: 44rem;
+}
+
+.toolbar {
+  display: grid;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.result {
+  color: var(--color-telemetry);
+}
+
+.empty {
+  max-width: 36rem;
+}
+
+.emptyBody {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+}

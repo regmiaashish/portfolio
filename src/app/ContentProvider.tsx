@@ -42,6 +42,7 @@ export function ContentProvider({ children }: PropsWithChildren) {
   });
   const [content, setContent] = useState<SiteContent>(initial.content);
   const [source, setSource] = useState<"snapshot" | "cache" | "api">(initial.source);
+  const [settled, setSettled] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -56,6 +57,9 @@ export function ContentProvider({ children }: PropsWithChildren) {
         })
         .catch(() => {
           // What's on screen stays; nothing to show the visitor.
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setSettled(true);
         });
     });
     return () => {
@@ -64,6 +68,6 @@ export function ContentProvider({ children }: PropsWithChildren) {
     };
   }, []);
 
-  const value = useMemo(() => ({ content, source }), [content, source]);
+  const value = useMemo(() => ({ content, source, settled }), [content, source, settled]);
   return <ContentContext.Provider value={value}>{children}</ContentContext.Provider>;
 }

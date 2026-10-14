@@ -63,7 +63,17 @@ export function seoTags(content: Profile, siteUrl: string): HtmlTagDescriptor[] 
   ];
 }
 
-export function seoPlugin(siteUrl: string): Plugin {
+/** The API's origin, for an early preconnect (health, context and content all go there). */
+export function apiOrigin(apiUrl: string | undefined): string | null {
+  if (!apiUrl) return null;
+  try {
+    return new URL(apiUrl).origin;
+  } catch {
+    return null;
+  }
+}
+
+export function seoPlugin(siteUrl: string, apiUrl?: string): Plugin {
   return {
     name: "portfolio-seo",
     transformIndexHtml: {
@@ -72,7 +82,17 @@ export function seoPlugin(siteUrl: string): Plugin {
         const tags = seoTags(profile, siteUrl);
         const files = Object.keys(context.bundle ?? {});
         const preloads = FIRST_SCREEN_FONTS.flatMap((pattern) => files.filter((file) => pattern.test(file)));
+        const api = apiOrigin(apiUrl);
         return [
+          ...(api
+            ? [
+                {
+                  tag: "link",
+                  attrs: { rel: "preconnect", href: api, crossorigin: "" },
+                  injectTo: "head-prepend",
+                } satisfies HtmlTagDescriptor,
+              ]
+            : []),
           ...preloads.map(
             (file): HtmlTagDescriptor => ({
               tag: "link",

@@ -1,0 +1,57 @@
+.panel {
+  align-self: start;
+}
+
+.heading {
+  font-size: var(--text-xl);
+}
+
+.intro {
+  margin-top: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.pipeline {
+  display: grid;
+  margin-top: var(--space-5);
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--color-panel-border);
+  border-radius: var(--radius-input);
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+
+.step + .step {
+  border-top: 1px dashed var(--color-panel-border);
+}
+
+.index {
+  color: var(--color-telemetry);
+}
+
+.stepText {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.agent {
+  color: var(--color-text);
+}
+
+.task {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.cta {
+  width: 100%;
+  margin-top: var(--space-5);
+}

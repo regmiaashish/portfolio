@@ -1,18 +1,21 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router";
+import { useLocation } from "react-router";
 
 import { useContent } from "../../hooks/useContent";
 import { useTheme } from "../../hooks/useTheme";
+import { TransitionLink, TransitionNavLink } from "../motion/TransitionLink";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 import { Container } from "./Container";
 import styles from "./Header.module.css";
 
-const NAV_LINKS = [
-  { label: "Work", to: "/#work" },
-  { label: "Pitch", to: "/#pitch" },
-  { label: "Contact", to: "/#contact" },
-];
+export const NAV_LINKS = [
+  { label: "Work", to: "/work" },
+  { label: "Pitch", to: "/pitch" },
+  { label: "About", to: "/about" },
+  { label: "Résumé", to: "/resume" },
+  { label: "Contact", to: "/contact" },
+] as const;
 
 export function Header() {
   const { profile } = useContent().content;
@@ -43,18 +46,26 @@ export function Header() {
   return (
     <header className={styles.header}>
       <Container className={styles.bar}>
-        <Link to="/" className={styles.brand}>
+        <TransitionLink to="/" className={styles.brand} aria-label={`${profile.name}, home`}>
+          <span className={styles.prompt} aria-hidden="true">
+            ~/
+          </span>
           {profile.name}
-        </Link>
+          <span className={styles.cursor} aria-hidden="true" />
+        </TransitionLink>
 
         <div className={styles.actions}>
           <nav id="site-nav" aria-label="Main" className={styles.nav} data-open={menuOpen}>
             <ul>
               {NAV_LINKS.map((link) => (
                 <li key={link.to}>
-                  <Link to={link.to} onClick={() => setMenuOpen(false)}>
+                  <TransitionNavLink
+                    to={link.to}
+                    className={styles.navLink}
+                    onClick={() => setMenuOpen(false)}
+                  >
                     {link.label}
-                  </Link>
+                  </TransitionNavLink>
                 </li>
               ))}
             </ul>

@@ -1,55 +1,79 @@
+import { isPitchEnabled } from "../../lib/features";
+import { Panel } from "../console/Panel";
+import { StatusLight } from "../console/StatusLight";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Field";
-import { StatusDot } from "../ui/StatusDot";
 import { PitchDemo } from "./PitchDemo";
+import { PitchGuardrails } from "./PitchGuardrails";
 import styles from "./PitchPanel.module.css";
+import { PitchPipeline } from "./PitchPipeline";
 
-const AGENTS = ["Researcher", "Matchmaker", "Writer"] as const;
+const IDLE_AGENTS = { researcher: "idle", matchmaker: "idle", writer: "idle" } as const;
 
 /**
- * The Pitch Me demo in the hero. It ships dark: unless VITE_PITCH_ENABLED is "true" at
- * build time, visitors see the disabled "coming soon" panel and nothing calls the backend.
+ * The Pitch Me workspace on /pitch. It ships dark: unless VITE_PITCH_ENABLED is "true" at
+ * build time, visitors see the same pipeline at rest with an explanation, and nothing calls
+ * the backend.
  */
 export function PitchPanel() {
-  const enabled = import.meta.env.VITE_PITCH_ENABLED === "true";
-
+  const enabled = isPitchEnabled();
   return (
-    <aside id="pitch" aria-labelledby="pitch-heading" className={styles.panel}>
-      <h2 id="pitch-heading">Pitch me</h2>
+    <section id="pitch" aria-label="Pitch me" className={styles.workspace}>
       {enabled ? <PitchDemo /> : <ComingSoon />}
-    </aside>
+    </section>
   );
 }
 
 function ComingSoon() {
   return (
     <>
-      <p className={styles.intro}>
-        Name a company and a role, and three agents research it, match it to my work and write a
-        short pitch. Coming soon.
-      </p>
+      <Panel
+        as="section"
+        aria-labelledby="pitch-pipeline-heading"
+        title="agents.pipeline"
+        status={<StatusLight status="idle" label="coming soon" />}
+      >
+        <h2 id="pitch-pipeline-heading" className="visually-hidden">
+          Agent pipeline
+        </h2>
+        <PitchPipeline agents={IDLE_AGENTS} />
+      </Panel>
 
-      <form className={styles.form} onSubmit={(event) => event.preventDefault()}>
-        <div className={styles.inputs}>
-          <Input label="Company" name="company" placeholder="e.g. Spotify" disabled />
-          <Input label="Role" name="role" placeholder="e.g. Backend" disabled />
-        </div>
-        <Button type="submit" variant="secondary" disabled>
-          Pitch me (coming soon)
-        </Button>
-      </form>
+      <div className={styles.grid}>
+        <Panel
+          as="section"
+          aria-labelledby="pitch-request-heading"
+          title="pitch.request"
+          status={<StatusLight status="idle" label="offline" />}
+        >
+          <h2 id="pitch-request-heading" className={styles.panelHeading}>
+            Your request
+          </h2>
+          <p className={styles.intro}>
+            The demo is wired up and tested; it goes live once its keys and spending limits are
+            in place. Coming soon.
+          </p>
+          <form className={styles.form} onSubmit={(event) => event.preventDefault()}>
+            <div className={styles.inputs}>
+              <Input label="Company" name="company" placeholder="e.g. Spotify" disabled />
+              <Input label="Role" name="role" placeholder="e.g. Backend" disabled />
+            </div>
+            <Button type="submit" variant="secondary" disabled>
+              Pitch me (coming soon)
+            </Button>
+          </form>
+        </Panel>
 
-      <ul className={styles.agents} aria-label="Agents">
-        {AGENTS.map((agent) => (
-          <li key={agent} className={styles.agent}>
-            <StatusDot status="idle" />
-            {agent}
-            <span className={styles.agentState} aria-hidden="true">
-              idle
-            </span>
-          </li>
-        ))}
-      </ul>
+        <Panel as="section" aria-labelledby="pitch-guardrails-heading" title="how-it-works">
+          <h2 id="pitch-guardrails-heading" className={styles.panelHeading}>
+            How it works
+          </h2>
+          <p className={styles.intro}>
+            A real multi-agent pipeline with the controls a paid AI feature needs in production.
+          </p>
+          <PitchGuardrails />
+        </Panel>
+      </div>
     </>
   );
 }

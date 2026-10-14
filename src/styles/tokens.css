@@ -29,6 +29,17 @@
   --color-err: #d64545;
   --color-err-text: #b42f2f;
 
+  /* Console surfaces (light = engineering blueprint on paper) */
+  --color-panel: #ffffff;
+  --color-panel-header: #eef3f8;
+  --color-panel-border: #c3cfdc;
+  --color-telemetry: #475569; /* mono labels and readouts */
+  --color-grid: rgb(36 71 209 / 0.075); /* blueprint lines */
+  --color-glow: rgb(232 163 23 / 0.16); /* marigold haze behind live elements */
+  --color-glow-signal: rgb(46 91 255 / 0.1);
+  --shadow-panel: 0 1px 2px rgb(15 30 51 / 0.06), 0 10px 28px -16px rgb(15 30 51 / 0.22);
+  --shadow-lift: 0 2px 4px rgb(15 30 51 / 0.08), 0 22px 44px -20px rgb(15 30 51 / 0.32);
+
   /* Typography */
   --font-heading: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Public Sans Variable", ui-sans-serif, system-ui, sans-serif;
@@ -66,10 +77,18 @@
   --gutter: clamp(1rem, 0.6rem + 2vw, 2rem);
   --header-height: 4rem;
 
-  /* Motion */
+  /* Motion (all of it is switched off under prefers-reduced-motion in base.css) */
   --duration-fast: 120ms;
   --duration-base: 200ms;
+  --duration-slow: 420ms;
+  --duration-reveal: 640ms;
   --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-emphasis: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Console grid */
+  --grid-size: 32px;
+  --status-bar-height: 2.25rem;
 }
 
 /* Dark theme: follows the system unless the visitor picked light explicitly... */
@@ -94,6 +113,15 @@
     --color-ok-text: #3cc48e;
     --color-err: #f07a7a;
     --color-err-text: #f07a7a;
+    --color-panel: #101c31;
+    --color-panel-header: #0d182a;
+    --color-panel-border: #24344f;
+    --color-telemetry: #a3b1c4;
+    --color-grid: rgb(143 168 255 / 0.065);
+    --color-glow: rgb(242 181 58 / 0.12);
+    --color-glow-signal: rgb(143 168 255 / 0.12);
+    --shadow-panel: inset 0 1px 0 rgb(255 255 255 / 0.04), 0 16px 40px -20px rgb(0 0 0 / 0.7);
+    --shadow-lift: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 26px 56px -24px rgb(0 0 0 / 0.85);
   }
 }
 
@@ -118,4 +146,13 @@
   --color-ok-text: #3cc48e;
   --color-err: #f07a7a;
   --color-err-text: #f07a7a;
+  --color-panel: #101c31;
+  --color-panel-header: #0d182a;
+  --color-panel-border: #24344f;
+  --color-telemetry: #a3b1c4;
+  --color-grid: rgb(143 168 255 / 0.065);
+  --color-glow: rgb(242 181 58 / 0.12);
+  --color-glow-signal: rgb(143 168 255 / 0.12);
+  --shadow-panel: inset 0 1px 0 rgb(255 255 255 / 0.04), 0 16px 40px -20px rgb(0 0 0 / 0.7);
+  --shadow-lift: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 26px 56px -24px rgb(0 0 0 / 0.85);
 }

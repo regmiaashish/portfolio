@@ -1,0 +1,31 @@
+.section {
+  padding-block: var(--space-8) 0;
+}
+
+.band {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding: var(--space-7) var(--space-6);
+  background:
+    radial-gradient(30rem 16rem at 0% 0%, var(--color-glow), transparent 70%),
+    var(--color-panel);
+  border: 1px solid var(--color-panel-border);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-panel);
+}
+
+.label {
+  color: var(--color-telemetry);
+}
+
+.heading {
+  margin-top: var(--space-3);
+}
+
+.text {
+  margin-top: var(--space-3);
+  color: var(--color-text-muted);
+}

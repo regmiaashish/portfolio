@@ -115,3 +115,108 @@ select {
     scroll-behavior: auto !important;
   }
 }
+
+/* --- Console atmosphere ----------------------------------------------------------- */
+
+/*
+ * The backdrop: a fine grid that fades out towards the edges, plus two soft hazes
+ * (marigold for "live", signal blue for "system"). Pure CSS, fixed behind the page, never
+ * animated, so it costs nothing for LCP/CLS. Rendered once by AppLayout.
+ */
+.console-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(42rem 26rem at 12% -4%, var(--color-glow), transparent 70%),
+    radial-gradient(38rem 30rem at 92% 8%, var(--color-glow-signal), transparent 72%),
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size:
+    auto,
+    auto,
+    var(--grid-size) var(--grid-size),
+    var(--grid-size) var(--grid-size);
+  background-position:
+    0 0,
+    0 0,
+    -1px -1px,
+    -1px -1px;
+  -webkit-mask-image: radial-gradient(ellipse 120% 85% at 50% 0%, #000 45%, transparent 100%);
+  mask-image: radial-gradient(ellipse 120% 85% at 50% 0%, #000 45%, transparent 100%);
+}
+
+/* Monospace is reserved for telemetry: labels, readouts, paths and logs. */
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Page transitions (View Transitions API; see components/motion/TransitionLink) -- */
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--duration-slow);
+  animation-timing-function: var(--ease-emphasis);
+}
+
+::view-transition-old(root) {
+  animation-name: vt-fade-out;
+}
+
+::view-transition-new(root) {
+  animation-name: vt-fade-in;
+}
+
+/* The header stays put while the page underneath changes. */
+::view-transition-old(site-header),
+::view-transition-new(site-header) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* --- Scroll reveal (components/motion/Reveal) -------------------------------------- */
+
+[data-reveal="pending"] {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+[data-reveal="shown"] {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--duration-reveal) var(--ease-emphasis),
+    transform var(--duration-reveal) var(--ease-emphasis);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

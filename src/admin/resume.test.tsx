@@ -24,40 +24,43 @@ beforeEach(() => {
   installFakeXHR();
 });
 
-describe("public résumé link", () => {
-  it("is hidden while no résumé is set", () => {
+describe("public résumé links", () => {
+  it("are hidden while no résumé is set", () => {
     renderApp("/");
 
-    expect(screen.queryByRole("link", { name: /Résumé \(PDF\)/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "View résumé" })).not.toBeInTheDocument();
   });
 
-  it("appears in the hero and in Contact once the profile has one", async () => {
+  it("point to the /resume page from the hero and the contact page once one is set", async () => {
     const content: SiteContent = {
       ...contentSnapshot,
       profile: { ...contentSnapshot.profile, resume_url: RESUME_URL },
       updated_at: "2026-10-14T10:00:00Z",
     };
     mockApi({ "GET /api/v1/content": () => jsonResponse(200, content) });
-    renderApp("/");
 
-    const links = await screen.findAllByRole("link", { name: /^Résumé \(PDF\)/ });
-    expect(links).toHaveLength(2);
-    for (const link of links) {
-      expect(link).toHaveAttribute("href", RESUME_URL);
-      expect(link).toHaveAttribute("target", "_blank");
-      expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    for (const [url, name] of [
+      ["/", "View résumé"],
+      ["/contact", "Résumé"],
+    ] as const) {
+      const view = renderApp(url);
+      const main = await screen.findByRole("main");
+      const link = await within(main).findByRole("link", { name });
+      expect(link).toHaveAttribute("href", "/resume");
+      expect(link).not.toHaveAttribute("target");
+      view.unmount();
     }
   });
 });
 
-describe("admin résumé field", () => {
+describe("admin Résumé tab", () => {
   it("uploads a PDF straight to S3 (purpose resume) and saves its URL with the profile", async () => {
     const user = userEvent.setup({ applyAccept: false });
     const { calls } = mockAdminApi({
       "POST /api/v1/admin/uploads": () => jsonResponse(200, TICKET),
       "PUT /api/v1/admin/profile": (init) => jsonResponse(200, JSON.parse(String(init?.body))),
     });
-    renderApp("/admin/profile");
+    renderApp("/admin/resume");
 
     await user.upload(await screen.findByLabelText("Or upload a PDF"), pdf());
 
@@ -71,8 +74,8 @@ describe("admin résumé field", () => {
     const [xhr] = FakeXHR.instances;
     expect([...xhr.body!.keys()].at(-1)).toBe("file"); // S3 requires the file last
 
-    await user.click(screen.getByRole("button", { name: "Save profile" }));
-    await screen.findByText(/Profile saved/);
+    await user.click(screen.getByRole("button", { name: "Save résumé" }));
+    await screen.findByText(/Résumé saved/);
     expect(calls("PUT", "/api/v1/admin/profile")[0].body.resume_url).toBe(RESUME_URL);
   });
 
@@ -82,7 +85,7 @@ describe("admin résumé field", () => {
   ])("rejects %s before asking the server", async (_name, file, message) => {
     const user = userEvent.setup({ applyAccept: false });
     const { calls } = mockAdminApi();
-    renderApp("/admin/profile");
+    renderApp("/admin/resume");
 
     await user.upload(await screen.findByLabelText("Or upload a PDF"), file);
 
@@ -98,28 +101,53 @@ describe("admin résumé field", () => {
         jsonResponse(200, { ...content, profile: { ...content.profile!, resume_url: RESUME_URL } }),
       "PUT /api/v1/admin/profile": (init) => jsonResponse(200, JSON.parse(String(init?.body))),
     });
-    renderApp("/admin/profile");
+    renderApp("/admin/resume");
 
     const field = await screen.findByLabelText("Résumé link");
     expect(field).toHaveValue(RESUME_URL);
 
     await user.clear(field);
     await user.type(field, "drive.google.com/cv");
-    await user.click(screen.getByRole("button", { name: "Save profile" }));
+    await user.click(screen.getByRole("button", { name: "Save résumé" }));
     expect(field).toHaveAccessibleDescription(/must start with https:\/\//);
     expect(calls("PUT", "/api/v1/admin/profile")).toHaveLength(0);
 
     await user.clear(field);
     await user.type(field, "https://drive.google.com/cv");
-    await user.click(screen.getByRole("button", { name: "Save profile" }));
-    await screen.findByText(/Profile saved/);
+    await user.click(screen.getByRole("button", { name: "Save résumé" }));
+    await screen.findByText(/Résumé saved/);
     expect(calls("PUT", "/api/v1/admin/profile")[0].body.resume_url).toBe("https://drive.google.com/cv");
 
-    const fieldset = screen.getByRole("group", { name: "Résumé" });
-    await user.click(within(fieldset).getByRole("button", { name: "Remove résumé" }));
+    await user.click(screen.getByRole("button", { name: "Remove résumé" }));
     expect(field).toHaveValue("");
-    await user.click(screen.getByRole("button", { name: "Save profile" }));
-    await screen.findAllByText(/Profile saved/);
-    expect(calls("PUT", "/api/v1/admin/profile").at(-1)!.body.resume_url).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Save résumé" }));
+    await screen.findAllByText(/Résumé saved/);
+    const removal = calls("PUT", "/api/v1/admin/profile").at(-1)!.body;
+    expect(removal.resume_url).toBeNull();
+    // Only the résumé changes: every other profile field goes back exactly as stored.
+    expect({ ...removal, resume_url: undefined }).toEqual({ ...content.profile!, resume_url: undefined });
+  });
+
+  it("is a tab in the admin and the Profile editor links to it", async () => {
+    mockAdminApi();
+    renderApp("/admin/profile");
+
+    const tabs = await screen.findByRole("navigation", { name: "Admin sections" });
+    expect(within(tabs).getByRole("link", { name: "Résumé" })).toHaveAttribute("href", "/admin/resume");
+    const main = screen.getByRole("main");
+    expect(await within(main).findByRole("link", { name: "Résumé" })).toHaveAttribute(
+      "href",
+      "/admin/resume",
+    );
+    expect(screen.queryByLabelText("Résumé link")).not.toBeInTheDocument();
+  });
+
+  it("asks for a profile first when none is saved", async () => {
+    const content = adminContentFixture();
+    mockAdminApi({ "GET /api/v1/admin/content": () => jsonResponse(200, { ...content, profile: null }) });
+    renderApp("/admin/resume");
+
+    expect(await screen.findByText(/Save your/)).toBeInTheDocument();
+    expect(screen.queryByLabelText("Résumé link")).not.toBeInTheDocument();
   });
 });

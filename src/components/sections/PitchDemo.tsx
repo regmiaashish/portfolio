@@ -7,21 +7,30 @@ import {
   useState,
 } from "react";
 
-import { AGENT_NAMES, type PitchError, usePitchStream } from "../../hooks/usePitchStream";
+import { type PitchError, type PitchState, usePitchStream } from "../../hooks/usePitchStream";
 import { useTheme } from "../../hooks/useTheme";
 import { useTurnstile } from "../../hooks/useTurnstile";
+import { pipelineLamp } from "../../lib/pitchPipeline";
 import { PITCH_MAX_LENGTH, type PitchField, validatePitchField } from "../../lib/pitchValidation";
+import { Panel } from "../console/Panel";
+import { StatusLight } from "../console/StatusLight";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Field";
-import { StatusDot } from "../ui/StatusDot";
+import { PitchGuardrails } from "./PitchGuardrails";
 import styles from "./PitchPanel.module.css";
-
-const AGENT_LABELS = { researcher: "Researcher", matchmaker: "Matchmaker", writer: "Writer" };
+import { PitchPipeline } from "./PitchPipeline";
 const FIELD_IDS: Record<PitchField, string> = { company: "pitch-company", role: "pitch-role" };
 const COPIED_FOR_MS = 2000;
 
 type Values = Record<PitchField, string>;
 type Errors = Partial<Record<PitchField, string>>;
+
+function outputLamp(state: PitchState): { status: "idle" | "running" | "done" | "error"; label: string } {
+  if (state.status === "running") return { status: "running", label: state.text ? "streaming" : "thinking" };
+  if (state.status === "done") return { status: "done", label: state.cached ? "cached" : "ready" };
+  if (state.status === "error") return { status: "error", label: "error" };
+  return { status: "idle", label: "waiting" };
+}
 
 function errorText(error: PitchError): string {
   if (error.code === "daily_cap" || error.code === "disabled") {
@@ -110,119 +119,157 @@ export function PitchDemo() {
     }
   };
 
-  const showResults = state.status !== "idle" || state.text !== "";
+  const lamp = pipelineLamp(state.status, state.cached);
+  const output = outputLamp(state);
 
   return (
     <>
-      <p className={styles.intro}>
-        Name a company and a role. Three agents research it, match it to my work and write a short
-        pitch, live.
-      </p>
+      <Panel
+        as="section"
+        aria-labelledby="pitch-pipeline-heading"
+        title="agents.pipeline"
+        status={<StatusLight status={lamp.status} label={lamp.label} />}
+      >
+        <h2 id="pitch-pipeline-heading" className="visually-hidden">
+          Agent pipeline
+        </h2>
+        <PitchPipeline agents={state.agents} />
+      </Panel>
 
-      <form className={styles.form} onSubmit={onSubmit} noValidate>
-        <div className={styles.inputs}>
-          <Input
-            id={FIELD_IDS.company}
-            label="Company"
-            name="company"
-            placeholder="e.g. Spotify"
-            autoComplete="off"
-            maxLength={PITCH_MAX_LENGTH}
-            value={values.company}
-            onChange={onChange}
-            onBlur={onBlur}
-            error={errors.company}
-            disabled={running}
-          />
-          <Input
-            id={FIELD_IDS.role}
-            label="Role"
-            name="role"
-            placeholder="e.g. Backend"
-            autoComplete="off"
-            maxLength={PITCH_MAX_LENGTH}
-            value={values.role}
-            onChange={onChange}
-            onBlur={onBlur}
-            error={errors.role}
-            disabled={running}
-          />
-        </div>
-        {turnstile.enabled && <div ref={turnstile.containerRef} className={styles.turnstile} />}
-        {formError && (
-          <p className={styles.error} role="alert">
-            {formError}
-          </p>
-        )}
-        <Button type="submit" variant="secondary" disabled={running} aria-busy={running}>
-          {running ? "Pitching…" : "Pitch me"}
-        </Button>
-      </form>
+      <div className={styles.grid}>
+        <div className={styles.column}>
+          <Panel as="section" aria-labelledby="pitch-request-heading" title="pitch.request">
+            <h2 id="pitch-request-heading" className={styles.panelHeading}>
+              Your request
+            </h2>
+            <form className={styles.form} onSubmit={onSubmit} noValidate>
+              <div className={styles.inputs}>
+                <Input
+                  id={FIELD_IDS.company}
+                  label="Company"
+                  name="company"
+                  placeholder="e.g. Spotify"
+                  autoComplete="off"
+                  maxLength={PITCH_MAX_LENGTH}
+                  value={values.company}
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  error={errors.company}
+                  disabled={running}
+                />
+                <Input
+                  id={FIELD_IDS.role}
+                  label="Role"
+                  name="role"
+                  placeholder="e.g. Backend"
+                  autoComplete="off"
+                  maxLength={PITCH_MAX_LENGTH}
+                  value={values.role}
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  error={errors.role}
+                  disabled={running}
+                />
+              </div>
+              {turnstile.enabled && <div ref={turnstile.containerRef} className={styles.turnstile} />}
+              {formError && (
+                <p className={styles.error} role="alert">
+                  {formError}
+                </p>
+              )}
+              <Button type="submit" variant="secondary" disabled={running} aria-busy={running}>
+                {running ? "Pitching…" : "Pitch me"}
+              </Button>
+            </form>
+          </Panel>
 
-      <ul className={styles.agents} aria-label="Agents">
-        {AGENT_NAMES.map((agent) => (
-          <li key={agent} className={styles.agent}>
-            <StatusDot status={state.agents[agent]} />
-            {AGENT_LABELS[agent]}
-            <span className={styles.agentState} aria-hidden="true">
-              {state.agents[agent]}
-            </span>
-          </li>
-        ))}
-      </ul>
-
-      {/* Announces only the outcome; streamed tokens would overwhelm a screen reader. */}
-      <p className="visually-hidden" role="status">
-        {state.status === "done" ? "Your pitch is ready." : ""}
-      </p>
-
-      {showResults && (
-        <div className={styles.results}>
-          {state.log.length > 0 && (
+          <Panel
+            as="section"
+            aria-labelledby="pitch-log-heading"
+            title="agents.log"
+            actions={
+              <span className="mono" aria-hidden="true">
+                {state.log.length} {state.log.length === 1 ? "event" : "events"}
+              </span>
+            }
+          >
+            <h2 id="pitch-log-heading" className="visually-hidden">
+              Agent log
+            </h2>
+            {/* Present from the start so assistive tech tracks it as a live log. */}
             <ol ref={logRef} className={styles.log} role="log" aria-label="Agent log">
               {state.log.map((entry, index) => (
-                <li key={index}>
-                  <span className={styles.logAgent}>{entry.agent}</span> {entry.message}
+                <li key={index} className={styles.logLine}>
+                  <span className={styles.logAgent}>{entry.agent}</span>
+                  <span>{entry.message}</span>
                 </li>
               ))}
             </ol>
-          )}
-
-          <section aria-labelledby="pitch-output-heading" className={styles.outputBlock}>
-            <h3 id="pitch-output-heading" className={styles.outputHeading}>
-              Your pitch
-            </h3>
-            <p className={styles.output}>
-              {state.text ||
-                (running ? <span className={styles.waiting}>Waiting for the writer…</span> : null)}
-              {running && <span className={styles.caret} aria-hidden="true" />}
-            </p>
-            {state.status === "done" && state.cached && (
-              <p className={styles.note}>Cached result: this pitch was written earlier today.</p>
-            )}
-            {state.status === "error" && state.error && (
-              <p className={styles.error} role="alert">
-                {errorText(state.error)}
+            {state.log.length === 0 && (
+              <p className={`mono ${styles.empty}`}>
+                Each agent reports here as it works. Start a run to watch.
               </p>
             )}
-            <div className={styles.outputActions}>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={onCopy}
-                disabled={state.status !== "done" || !state.text}
-              >
-                {copy === "copied" ? "Copied" : "Copy pitch"}
-              </Button>
-              {copy === "failed" && (
-                <p className={styles.note} role="status">
-                  Couldn't copy automatically. Select the text and copy it.
-                </p>
-              )}
-            </div>
-          </section>
+          </Panel>
         </div>
-      )}
+
+        <Panel
+          as="section"
+          aria-labelledby="pitch-output-heading"
+          title="pitch.output"
+          status={<StatusLight status={output.status} label={output.label} />}
+          className={styles.outputPanel}
+        >
+          <h2 id="pitch-output-heading" className={styles.panelHeading}>
+            Your pitch
+          </h2>
+          <p className={styles.output}>
+            {state.text ||
+              (running ? (
+                <span className={styles.waiting}>Waiting for the writer…</span>
+              ) : (
+                <span className={styles.waiting}>
+                  Your pitch appears here, written live by the writer agent.
+                </span>
+              ))}
+            {running && <span className={styles.caret} aria-hidden="true" />}
+          </p>
+          {/* Announces only the outcome; streamed tokens would overwhelm a screen reader. */}
+          <p className="visually-hidden" role="status">
+            {state.status === "done" ? "Your pitch is ready." : ""}
+          </p>
+          {state.status === "done" && state.cached && (
+            <p className={styles.note}>Cached result: replayed from an earlier run, so no agents were re-run.</p>
+          )}
+          {state.status === "error" && state.error && (
+            <p className={styles.error} role="alert">
+              {errorText(state.error)}
+            </p>
+          )}
+          <div className={styles.outputActions}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={onCopy}
+              disabled={state.status !== "done" || !state.text}
+            >
+              {copy === "copied" ? "Copied" : "Copy pitch"}
+            </Button>
+            {copy === "failed" && (
+              <p className={styles.note} role="status">
+                Couldn't copy automatically. Select the text and copy it.
+              </p>
+            )}
+          </div>
+        </Panel>
+      </div>
+
+      <Panel as="section" aria-labelledby="pitch-guardrails-heading" title="how-it-works">
+        <h2 id="pitch-guardrails-heading" className={styles.panelHeading}>
+          How it works
+        </h2>
+        <PitchGuardrails />
+      </Panel>
     </>
   );
 }

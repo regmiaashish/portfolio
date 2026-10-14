@@ -38,3 +38,14 @@
   background: var(--color-surface-sunken);
   border-radius: var(--radius-panel);
 }
+
+.sectionLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  font-weight: 600;
+}
+
+.pageBody {
+  padding-bottom: var(--space-8);
+}

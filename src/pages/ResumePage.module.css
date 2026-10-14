@@ -1,0 +1,63 @@
+.layout {
+  display: grid;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (min-width: 64rem) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 18rem;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.viewerBody {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.viewer {
+  display: block;
+  width: 100%;
+  height: min(80vh, 62rem);
+  min-height: 28rem;
+  border: 0;
+  border-radius: var(--radius-input);
+  background: var(--color-surface-sunken);
+}
+
+.note {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.side {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.empty {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 40rem;
+}
+
+/* Loading state: an invisible copy of the "not published" body reserves its exact size. */
+.reserve {
+  position: relative;
+}
+
+.reserveGhost {
+  visibility: hidden;
+}
+
+.reserveLabel {
+  position: absolute;
+  inset: 0 auto auto 0;
+  color: var(--color-text-muted);
+}

@@ -1,0 +1,70 @@
+.heading {
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-4);
+}
+
+.readouts {
+  margin-bottom: var(--space-5);
+}
+
+.chart {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.rowLabel {
+  color: var(--color-telemetry);
+}
+
+.track {
+  position: relative;
+  height: 0.75rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-sunken);
+  overflow: hidden;
+}
+
+.segment {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--radius-pill);
+}
+
+.yours {
+  background: var(--color-signal);
+}
+
+.mine {
+  background: var(--color-ok);
+}
+
+/* Striped so "both" never relies on colour alone. */
+.both {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--color-text) 0 3px,
+    transparent 3px 6px
+  );
+  border: 1px solid var(--color-text);
+}
+
+.axis {
+  display: flex;
+  justify-content: space-between;
+  margin-left: calc(2.75rem + var(--space-3));
+  color: var(--color-telemetry);
+}
+
+.note {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}

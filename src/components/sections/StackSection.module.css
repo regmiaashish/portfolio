@@ -1,0 +1,43 @@
+.principlesPanel {
+  margin-bottom: var(--space-6);
+}
+
+.principles {
+  display: grid;
+  gap: var(--space-4) var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 56rem) {
+  .principles {
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  }
+}
+
+.principle {
+  display: grid;
+  gap: var(--space-1);
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--color-panel-border);
+}
+
+.principleLabel {
+  color: var(--color-telemetry);
+}
+
+.groups {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+}
+
+.group {
+  height: 100%;
+}
+
+.groupTitle {
+  margin-bottom: var(--space-4);
+  font-size: var(--text-lg);
+}

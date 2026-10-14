@@ -7,7 +7,7 @@ import { useAdminContent } from "../adminContent";
 import { adminApi } from "../api";
 import styles from "../Admin.module.css";
 import { LoadState } from "../components/LoadState";
-import { ResumeField } from "../components/ResumeField";
+import { GuardedLink } from "../components/GuardedLink";
 import { useEntityForm } from "../useEntityForm";
 import { LIMITS, validateProfile } from "../validation";
 
@@ -192,14 +192,9 @@ function ProfileForm({ profile, isNew }: { profile: Profile; isNew: boolean }) {
           )}
         </fieldset>
 
-        <fieldset className={styles.fieldset}>
-          <legend>Résumé</legend>
-          <ResumeField
-            value={values.resume_url}
-            error={errors.resume_url}
-            onChange={(url) => update("resume_url", url)}
-          />
-        </fieldset>
+        <p className={styles.status}>
+          The résumé has its own tab: <GuardedLink to="/admin/resume">Résumé</GuardedLink>.
+        </p>
 
         <fieldset className={styles.fieldset}>
           <legend>Social links</legend>

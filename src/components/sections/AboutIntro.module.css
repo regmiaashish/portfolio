@@ -1,0 +1,26 @@
+.intro {
+  padding-bottom: var(--space-8);
+}
+
+.layout {
+  display: grid;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (min-width: 60rem) {
+  .layout {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: var(--space-8);
+  }
+}
+
+.lead {
+  font-size: var(--text-lg);
+  line-height: 1.65;
+  max-width: 60ch;
+}
+
+.panel {
+  width: 100%;
+}

@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
@@ -37,7 +37,8 @@ describe("Header mobile menu", () => {
     renderApp();
 
     await user.click(screen.getByRole("button", { name: "Open menu" }));
-    await user.click(screen.getByRole("link", { name: "Contact" }));
+    const nav = screen.getByRole("navigation", { name: "Main" });
+    await user.click(within(nav).getByRole("link", { name: "Contact" }));
 
     expect(screen.getByRole("button", { name: "Open menu" })).toHaveAttribute(
       "aria-expanded",

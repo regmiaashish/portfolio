@@ -1,0 +1,50 @@
+/* A slim strip of real telemetry under the header. Fixed height: never shifts layout. */
+.bar {
+  height: var(--status-bar-height);
+  border-bottom: 1px solid var(--color-panel-border);
+  background: color-mix(in srgb, var(--color-panel-header) 78%, transparent);
+  color: var(--color-telemetry);
+  overflow: hidden;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  white-space: nowrap;
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.value {
+  color: var(--color-text);
+}
+
+.divider {
+  width: 1px;
+  height: 0.875rem;
+  background: var(--color-panel-border);
+}
+
+.push {
+  margin-left: auto;
+}
+
+@media (max-width: 39.99rem) {
+  .optional {
+    display: none;
+  }
+
+  .inner {
+    gap: var(--space-3);
+  }
+}
