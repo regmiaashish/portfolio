@@ -6,6 +6,8 @@ import { Button } from "../components/ui/Button";
 import { useAdminSession } from "./adminContent";
 import styles from "./Admin.module.css";
 import { GuardedLink } from "./components/GuardedLink";
+import { messagesTabLabel } from "./messageFormat";
+import { useMessageStats } from "./unreadMessages";
 import { useLeaveGuard } from "./unsaved";
 
 const TABS = [
@@ -14,6 +16,7 @@ const TABS = [
   { label: "Projects", to: "/admin/projects" },
   { label: "Career", to: "/admin/career" },
   { label: "Skills", to: "/admin/skills" },
+  { label: "Messages", to: "/admin/messages" },
   { label: "Pitch history", to: "/admin/pitches" },
 ];
 
@@ -21,6 +24,7 @@ export function AdminShell({ children }: PropsWithChildren) {
   const { userName, signOut } = useAdminSession();
   const { pathname } = useLocation();
   const canLeave = useLeaveGuard();
+  const unread = useMessageStats().stats?.unread ?? 0;
 
   return (
     <div className={styles.shell}>
@@ -51,7 +55,17 @@ export function AdminShell({ children }: PropsWithChildren) {
                     to={tab.to}
                     aria-current={pathname.startsWith(tab.to) ? "page" : undefined}
                   >
-                    {tab.label}
+                    {tab.to === "/admin/messages" && unread > 0 ? (
+                      <>
+                        <span aria-hidden="true">{tab.label}</span>
+                        <span aria-hidden="true" className={styles.badge}>
+                          {unread > 99 ? "99+" : unread}
+                        </span>
+                        <span className="visually-hidden">{messagesTabLabel(unread)}</span>
+                      </>
+                    ) : (
+                      tab.label
+                    )}
                   </GuardedLink>
                 </li>
               ))}

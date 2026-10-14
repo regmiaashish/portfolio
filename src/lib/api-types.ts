@@ -161,6 +161,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/media/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Media
+         * @description An uploaded project image or résumé PDF. Only keys the upload endpoints issue exist.
+         */
+        get: operations["get_media_api_v1_media__key__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/content": {
         parameters: {
             query?: never;
@@ -447,6 +467,88 @@ export interface paths {
         post?: never;
         /** Delete Pitch Run */
         delete: operations["delete_pitch_run_api_v1_admin_pitches__run_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Messages
+         * @description Contact-form messages, newest first.
+         */
+        get: operations["list_messages_api_v1_admin_messages_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/messages/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Message Stats
+         * @description Unread and failed counts (for the nav badge), the total, and the last 7 days.
+         */
+        get: operations["message_stats_api_v1_admin_messages_stats_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/messages/{message_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Message
+         * @description The full message. Reading it doesn't mark it read; PATCH does.
+         */
+        get: operations["get_message_api_v1_admin_messages__message_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Message */
+        delete: operations["delete_message_api_v1_admin_messages__message_id__delete"];
+        options?: never;
+        head?: never;
+        /** Set Message Read */
+        patch: operations["set_message_read_api_v1_admin_messages__message_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/messages/{message_id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Retry Message
+         * @description Re-send the notification email of a failed message (202: back to pending).
+         */
+        post: operations["retry_message_api_v1_admin_messages__message_id__retry_post"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -808,6 +910,89 @@ export interface components {
              * @description User's password
              */
             password: string;
+        };
+        /** MessageDetail */
+        MessageDetail: {
+            /** Read At */
+            read_at: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Email */
+            email: string;
+            /** Message */
+            message: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "sent" | "failed";
+            /** Error */
+            error: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Read */
+            readonly read: boolean;
+        };
+        /** MessageList */
+        MessageList: {
+            /** Items */
+            items: components["schemas"]["MessageSummary"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
+        /** MessageReadInput */
+        MessageReadInput: {
+            /** Read */
+            read: boolean;
+        };
+        /** MessageStats */
+        MessageStats: {
+            /** Unread */
+            unread: number;
+            /** Failed */
+            failed: number;
+            /** Total */
+            total: number;
+            /** Last 7 Days */
+            last_7_days: number;
+        };
+        /** MessageSummary */
+        MessageSummary: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Email */
+            email: string;
+            /** Preview */
+            preview: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "sent" | "failed";
+            /** Read */
+            read: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /** OrderInput */
         OrderInput: {
@@ -1602,6 +1787,84 @@ export interface operations {
             };
         };
     };
+    get_media_api_v1_media__key__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The file (inline) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": unknown;
+                    "image/jpeg": unknown;
+                    "image/webp": unknown;
+                    "image/avif": unknown;
+                    "application/pdf": unknown;
+                };
+            };
+            /** @description Not modified (If-None-Match) */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not an uploaded file, or it doesn't exist */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Storage failed */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Uploads are not configured */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     admin_content_api_v1_admin_content_get: {
         parameters: {
             query?: never;
@@ -1663,7 +1926,10 @@ export interface operations {
     update_profile_api_v1_admin_profile_put: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description CSRF protection: must be "portfolio-admin". */
+                "X-Requested-With"?: string | null;
+            };
             path?: never;
             cookie?: {
                 access_token?: string | null;
@@ -1725,7 +1991,10 @@ export interface operations {
     create_project_api_v1_admin_projects_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description CSRF protection: must be "portfolio-admin". */
+                "X-Requested-With"?: string | null;
+            };
             path?: never;
             cookie?: {
                 access_token?: string | null;
@@ -1796,7 +2065,10 @@ export interface operations {
     reorder_projects_api_v1_admin_projects_order_put: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description CSRF protection: must be "portfolio-admin". */
+                "X-Requested-With"?: string | null;
+            };
             path?: never;
             cookie?: {
                 access_token?: string | null;
@@ -1856,7 +2128,10 @@ export interface operations {
     update_project_api_v1_admin_projects__project_id__put: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description CSRF protection: must be "portfolio-admin". */
+                "X-Requested-With"?: string | null;
+            };
             path: {
                 project_id: string;
             };
@@ -1938,7 +2213,10 @@ export interface operations {
     delete_project_api_v1_admin_projects__project_id__delete: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description CSRF protection: must be "portfolio-admin". */
+                "X-Requested-With"?: string | null;
+            };
             path: {
                 project_id: string;
             };
@@ -2005,7 +2283,10 @@ export interface operations {
     create_career_api_v1_admin_career_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description CSRF protection: must be "portfolio-admin". */
+                "X-Requested-With"?: string | null;
+            };
             path?: never;
             cookie?: {
                 access_token?: string | null;
@@ -2067,7 +2348,10 @@ export interface operations {
     reorder_career_api_v1_admin_career_order_put: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description CSRF protection: must be "portfolio-admin". */
+                "X-Requested-With"?: string | null;
+            };
             path?: never;
             cookie?: {
                 access_token?: string | null;
@@ -2127,7 +2411,10 @@ export interface operations {
     update_career_api_v1_admin_career__entry_id__put: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description CSRF protection: must be "portfolio-admin". */
+                "X-Requested-With"?: string | null;
+            };
             path: {
                 entry_id: string;
             };
@@ -2200,7 +2487,10 @@ export interface operations {
     delete_career_api_v1_admin_career__entry_id__delete: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description CSRF protection: must be "portfolio-admin". */
+                "X-Requested-With"?: string | null;
+            };
             path: {
                 entry_id: string;
             };
@@ -2267,7 +2557,10 @@ export interface operations {
     create_skill_group_api_v1_admin_skills_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description CSRF protection: must be "portfolio-admin". */
+                "X-Requested-With"?: string | null;
+            };
             path?: never;
             cookie?: {
                 access_token?: string | null;
@@ -2329,7 +2622,10 @@ export interface operations {
     reorder_skills_api_v1_admin_skills_order_put: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description CSRF protection: must be "portfolio-admin". */
+                "X-Requested-With"?: string | null;
+            };
             path?: never;
             cookie?: {
                 access_token?: string | null;
@@ -2389,7 +2685,10 @@ export interface operations {
     update_skill_group_api_v1_admin_skills__group_id__put: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description CSRF protection: must be "portfolio-admin". */
+                "X-Requested-With"?: string | null;
+            };
             path: {
                 group_id: string;
             };
@@ -2462,7 +2761,10 @@ export interface operations {
     delete_skill_group_api_v1_admin_skills__group_id__delete: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description CSRF protection: must be "portfolio-admin". */
+                "X-Requested-With"?: string | null;
+            };
             path: {
                 group_id: string;
             };
@@ -2529,7 +2831,10 @@ export interface operations {
     create_upload_api_v1_admin_uploads_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description CSRF protection: must be "portfolio-admin". */
+                "X-Requested-With"?: string | null;
+            };
             path?: never;
             cookie?: {
                 access_token?: string | null;
@@ -2600,7 +2905,10 @@ export interface operations {
     upload_file_api_v1_admin_uploads_file_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description CSRF protection: must be "portfolio-admin". */
+                "X-Requested-With"?: string | null;
+            };
             path?: never;
             cookie?: {
                 access_token?: string | null;
@@ -2878,7 +3186,10 @@ export interface operations {
     delete_pitch_run_api_v1_admin_pitches__run_id__delete: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description CSRF protection: must be "portfolio-admin". */
+                "X-Requested-With"?: string | null;
+            };
             path: {
                 run_id: string;
             };
@@ -2915,6 +3226,424 @@ export interface operations {
             };
             /** @description Unknown id */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_messages_api_v1_admin_messages_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+                q?: string | null;
+                status?: ("pending" | "sent" | "failed") | null;
+                unread?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageList"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not a superuser, or CSRF check failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    message_stats_api_v1_admin_messages_stats_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageStats"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not a superuser, or CSRF check failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_message_api_v1_admin_messages__message_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                message_id: string;
+            };
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageDetail"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not a superuser, or CSRF check failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unknown id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    delete_message_api_v1_admin_messages__message_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description CSRF protection: must be "portfolio-admin". */
+                "X-Requested-With"?: string | null;
+            };
+            path: {
+                message_id: string;
+            };
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not a superuser, or CSRF check failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unknown id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    set_message_read_api_v1_admin_messages__message_id__patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description CSRF protection: must be "portfolio-admin". */
+                "X-Requested-With"?: string | null;
+            };
+            path: {
+                message_id: string;
+            };
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MessageReadInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageDetail"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not a superuser, or CSRF check failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unknown id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    retry_message_api_v1_admin_messages__message_id__retry_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description CSRF protection: must be "portfolio-admin". */
+                "X-Requested-With"?: string | null;
+            };
+            path: {
+                message_id: string;
+            };
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageDetail"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not a superuser, or CSRF check failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unknown id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The message's email didn't fail */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

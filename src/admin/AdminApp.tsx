@@ -11,7 +11,10 @@ import { AdminShell } from "./AdminShell";
 import { fetchCurrentUser, logout, onSessionExpired } from "./api";
 import styles from "./Admin.module.css";
 import { CareerFormPage, CareerPage } from "./pages/CareerPages";
+import { MessageStatsProvider } from "./MessageStatsProvider";
 import { LoginPage } from "./pages/LoginPage";
+import { MessageDetailPage } from "./pages/MessageDetailPage";
+import { MessagesPage } from "./pages/MessagesPage";
 import { PitchDetailPage } from "./pages/PitchDetailPage";
 import { PitchHistoryPage } from "./pages/PitchHistoryPage";
 import { ProfileEditor } from "./pages/ProfileEditor";
@@ -41,6 +44,8 @@ function AdminRoutes() {
     { path: "skills", element: <SkillsPage /> },
     { path: "skills/new", element: <SkillFormPage /> },
     { path: "skills/:id", element: <SkillFormPage /> },
+    { path: "messages", element: <MessagesPage /> },
+    { path: "messages/:id", element: <MessageDetailPage /> },
     { path: "pitches", element: <PitchHistoryPage /> },
     { path: "pitches/:id", element: <PitchDetailPage /> },
     { path: "*", element: <Navigate to="projects" replace /> },
@@ -121,9 +126,11 @@ export default function AdminApp() {
   } else {
     body = (
       <AdminContentProvider>
-        <AdminShell>
-          <AdminRoutes />
-        </AdminShell>
+        <MessageStatsProvider>
+          <AdminShell>
+            <AdminRoutes />
+          </AdminShell>
+        </MessageStatsProvider>
       </AdminContentProvider>
     );
   }

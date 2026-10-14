@@ -4,6 +4,10 @@ import { contentSnapshot } from "../data/snapshot";
 import type {
   AdminContent,
   AdminUser,
+  MessageDetail,
+  MessageStats,
+  MessageStatus,
+  MessageSummary,
   PitchOutcome,
   PitchRunDetail,
   PitchRunSummary,
@@ -61,6 +65,7 @@ export function mockAdminApi(
     "POST /api/v1/auth/refresh": unauthorized,
     "POST /api/v1/auth/logout": () => jsonResponse(200, { success: true, message: "ok", data: null }),
     "GET /api/v1/admin/content": () => jsonResponse(200, content),
+    "GET /api/v1/admin/messages/stats": () => jsonResponse(200, messageStatsFixture({ unread: 0 })),
     ...overrides,
   });
 
@@ -209,6 +214,60 @@ export function mockPitchApi(
   return mockAdminApi({
     "GET /api/v1/admin/pitches/stats": () => jsonResponse(200, pitchStatsFixture()),
     "GET /api/v1/admin/pitches": (_init, url) => {
+      const limit = Number(url.searchParams.get("limit") ?? 20);
+      const offset = Number(url.searchParams.get("offset") ?? 0);
+      return jsonResponse(200, { items: all.slice(offset, offset + limit), total, limit, offset });
+    },
+    ...overrides,
+  });
+}
+
+// --- Contact messages ---------------------------------------------------------------
+
+const STATUS_CYCLE: MessageStatus[] = ["sent", "pending", "failed"];
+
+/** `count` messages, newest first: every other one unread, cycling delivery statuses. */
+export function messagesFixture(count: number, start = 0): MessageSummary[] {
+  return Array.from({ length: count }, (_, i) => {
+    const n = start + i;
+    return {
+      id: uuid(800 + n),
+      name: n === 0 ? "Jane Doe" : `Sender ${n}`,
+      email: n === 0 ? "jane@example.com" : `sender${n}@example.com`,
+      preview: n === 0 ? "Hi Aashish, we'd love to talk about a backend role…" : `Message ${n}`,
+      status: STATUS_CYCLE[n % STATUS_CYCLE.length],
+      read: n % 2 === 1,
+      created_at: new Date(Date.UTC(2026, 9, 14, 12, 0) - n * 3_600_000).toISOString(),
+    };
+  });
+}
+
+export function messageDetailFixture(overrides: Partial<MessageDetail> = {}): MessageDetail {
+  const [summary] = messagesFixture(1);
+  return {
+    id: summary.id,
+    name: summary.name,
+    email: summary.email,
+    message: "Hi Aashish,\nwe'd love to talk about a backend role.",
+    status: "sent",
+    error: null,
+    read: false,
+    read_at: null,
+    created_at: summary.created_at,
+    ...overrides,
+  };
+}
+
+export function messageStatsFixture(overrides: Partial<MessageStats> = {}): MessageStats {
+  return { unread: 3, failed: 1, total: 12, last_7_days: 5, ...overrides };
+}
+
+/** Admin API mock with a paginated message list of `total` messages (honours limit/offset). */
+export function mockMessagesApi(total: number, overrides: Parameters<typeof mockAdminApi>[0] = {}) {
+  const all = messagesFixture(total);
+  return mockAdminApi({
+    "GET /api/v1/admin/messages/stats": () => jsonResponse(200, messageStatsFixture()),
+    "GET /api/v1/admin/messages": (_init, url) => {
       const limit = Number(url.searchParams.get("limit") ?? 20);
       const offset = Number(url.searchParams.get("offset") ?? 0);
       return jsonResponse(200, { items: all.slice(offset, offset + limit), total, limit, offset });
