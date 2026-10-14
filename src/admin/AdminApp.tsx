@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useRoutes } from "react-router";
 
 import { Button } from "../components/ui/Button";
-import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { usePageMeta } from "../hooks/usePageMeta";
 import { ApiError } from "../lib/api";
 import type { AdminUser } from "../lib/cmsContracts";
 import { AdminSessionContext } from "./adminContent";
@@ -12,6 +12,8 @@ import { fetchCurrentUser, logout, onSessionExpired } from "./api";
 import styles from "./Admin.module.css";
 import { CareerFormPage, CareerPage } from "./pages/CareerPages";
 import { LoginPage } from "./pages/LoginPage";
+import { PitchDetailPage } from "./pages/PitchDetailPage";
+import { PitchHistoryPage } from "./pages/PitchHistoryPage";
 import { ProfileEditor } from "./pages/ProfileEditor";
 import { ProjectFormPage } from "./pages/ProjectForm";
 import { ProjectsPage } from "./pages/ProjectsPage";
@@ -23,17 +25,6 @@ type Session =
   | { status: "anonymous"; notice?: string }
   | { status: "forbidden"; user: AdminUser }
   | { status: "ready"; user: AdminUser };
-
-/** Keeps the admin out of search results while it's open. */
-function useNoIndex() {
-  useEffect(() => {
-    const meta = document.createElement("meta");
-    meta.name = "robots";
-    meta.content = "noindex, nofollow";
-    document.head.appendChild(meta);
-    return () => meta.remove();
-  }, []);
-}
 
 function AdminRoutes() {
   return useRoutes([
@@ -48,14 +39,16 @@ function AdminRoutes() {
     { path: "skills", element: <SkillsPage /> },
     { path: "skills/new", element: <SkillFormPage /> },
     { path: "skills/:id", element: <SkillFormPage /> },
+    { path: "pitches", element: <PitchHistoryPage /> },
+    { path: "pitches/:id", element: <PitchDetailPage /> },
     { path: "*", element: <Navigate to="projects" replace /> },
   ]);
 }
 
 /** `/admin/*`: session gate plus the dashboard. Lazy-loaded, so visitors never download it. */
 export default function AdminApp() {
-  useNoIndex();
-  useDocumentTitle("Site admin");
+  // Keeps the admin out of search results while it's open.
+  usePageMeta({ title: "Site admin", robots: "noindex, nofollow" });
   const [session, setSession] = useState<Session>({ status: "checking" });
   const dirtyRef = useRef(false);
 

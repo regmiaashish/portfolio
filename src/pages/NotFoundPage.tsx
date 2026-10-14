@@ -1,10 +1,10 @@
 import { Container } from "../components/layout/Container";
 import { ButtonLink } from "../components/ui/Button";
-import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { usePageMeta } from "../hooks/usePageMeta";
 import styles from "./Page.module.css";
 
 export function NotFoundPage() {
-  useDocumentTitle("Page not found");
+  usePageMeta({ title: "Page not found", robots: "noindex" });
   return (
     <div className={styles.page}>
       <Container>

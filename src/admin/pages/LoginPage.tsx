@@ -1,7 +1,7 @@
 import { type FormEvent, useState } from "react";
 
 import { Button } from "../../components/ui/Button";
-import { Input } from "../../components/ui/Field";
+import { Input, PasswordInput } from "../../components/ui/Field";
 import { ApiError } from "../../lib/api";
 import { login } from "../api";
 import styles from "../Admin.module.css";
@@ -58,9 +58,8 @@ export function LoginPage({ notice, onSignedIn }: LoginPageProps) {
           onChange={(event) => setEmail(event.target.value)}
           required
         />
-        <Input
+        <PasswordInput
           label="Password"
-          type="password"
           name="password"
           autoComplete="current-password"
           maxLength={128}

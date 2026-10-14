@@ -85,3 +85,33 @@ select.control {
   color: var(--color-text-muted);
   font-size: var(--text-sm);
 }
+
+.passwordWrap {
+  position: relative;
+}
+
+/* Leave room for the toggle so text never runs underneath it. */
+.passwordControl {
+  padding-right: 3rem;
+}
+
+.reveal {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-input);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.reveal:hover {
+  color: var(--color-text);
+}

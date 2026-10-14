@@ -24,6 +24,16 @@ export function Hero() {
             <ButtonLink variant="secondary" to="/#work">
               See my work
             </ButtonLink>
+            {profile.resume_url && (
+              <ButtonAnchor
+                variant="secondary"
+                href={profile.resume_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Résumé (PDF)<span className="visually-hidden"> (opens in a new tab)</span>
+              </ButtonAnchor>
+            )}
           </Stack>
         </div>
         <PitchPanel />

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import { afterPaint } from "../lib/afterPaint";
 import { request } from "../lib/api";
 import type { VisitorContext } from "../lib/contracts";
 
@@ -19,6 +20,8 @@ export function useVisitorContext(): VisitorContextState {
   useEffect(() => {
     const controller = new AbortController();
 
+    // Not needed for the first paint (the greeting shows a skeleton), so it waits until after it.
+    const cancel = afterPaint(() => {
     request<VisitorContext>("/api/v1/context", { signal: controller.signal })
       .then((data) => {
         if (controller.signal.aborted) return;
@@ -33,8 +36,12 @@ export function useVisitorContext(): VisitorContextState {
         if (error instanceof DOMException && error.name === "AbortError") return;
         setState({ status: "error", data: null });
       });
+    });
 
-    return () => controller.abort();
+    return () => {
+      cancel();
+      controller.abort();
+    };
   }, []);
 
   return state;

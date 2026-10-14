@@ -3,10 +3,10 @@ import { Contact } from "../components/sections/Contact";
 import { Hero } from "../components/sections/Hero";
 import { StackSection } from "../components/sections/StackSection";
 import { Work } from "../components/sections/Work";
-import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { usePageMeta } from "../hooks/usePageMeta";
 
 export function HomePage() {
-  useDocumentTitle();
+  usePageMeta();
   return (
     <>
       <Hero />

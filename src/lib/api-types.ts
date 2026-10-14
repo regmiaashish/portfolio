@@ -44,6 +44,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/sitemap.xml": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sitemap
+         * @description Home page plus one URL per published project, with lastmod dates.
+         */
+        get: operations["sitemap_sitemap_xml_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/contact": {
         parameters: {
             query?: never;
@@ -326,6 +346,64 @@ export interface paths {
         /** Create Upload */
         post: operations["create_upload_api_v1_admin_uploads_post"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/pitches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Pitch Runs
+         * @description Every Pitch Me run that started streaming, newest first.
+         */
+        get: operations["list_pitch_runs_api_v1_admin_pitches_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/pitches/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pitch Stats
+         * @description Today's paid runs against the daily cap, and the last 30 days' runs and spend (UTC).
+         */
+        get: operations["pitch_stats_api_v1_admin_pitches_stats_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/pitches/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Pitch Run */
+        get: operations["get_pitch_run_api_v1_admin_pitches__run_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Pitch Run */
+        delete: operations["delete_pitch_run_api_v1_admin_pitches__run_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -707,6 +785,110 @@ export interface components {
             /** Href */
             href: string;
         };
+        /** PitchRunDetail */
+        PitchRunDetail: {
+            /** Estimated Cost Usd */
+            estimated_cost_usd?: number | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Company */
+            company: string;
+            /** Role */
+            role: string;
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "completed" | "cached" | "timeout" | "upstream_error" | "internal_error" | "disconnected";
+            /** Pitch Text */
+            pitch_text: string | null;
+            /** Error Code */
+            error_code: string | null;
+            /** Duration Ms */
+            duration_ms: number;
+            /** Input Tokens */
+            input_tokens: number | null;
+            /** Output Tokens */
+            output_tokens: number | null;
+            /** Searches */
+            searches: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** PitchRunList */
+        PitchRunList: {
+            /** Items */
+            items: components["schemas"]["PitchRunSummary"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
+        /** PitchRunSummary */
+        PitchRunSummary: {
+            /** Estimated Cost Usd */
+            estimated_cost_usd?: number | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Company */
+            company: string;
+            /** Role */
+            role: string;
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "completed" | "cached" | "timeout" | "upstream_error" | "internal_error" | "disconnected";
+            /** Duration Ms */
+            duration_ms: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Preview */
+            preview?: string | null;
+        };
+        /** PitchStats */
+        PitchStats: {
+            /** Enabled */
+            enabled: boolean;
+            /** Daily Cap */
+            daily_cap: number;
+            today: components["schemas"]["PitchTodayStats"];
+            last_30_days: components["schemas"]["PitchWindowStats"];
+        };
+        /** PitchTodayStats */
+        PitchTodayStats: {
+            /** Paid Runs */
+            paid_runs: number;
+            /** Cached */
+            cached: number;
+            /** Failed */
+            failed: number;
+        };
+        /** PitchWindowStats */
+        PitchWindowStats: {
+            /** Runs */
+            runs: number;
+            /** Cached */
+            cached: number;
+            /** Failed */
+            failed: number;
+            /** Estimated Cost Usd */
+            estimated_cost_usd: number;
+        };
         /** ProfileInput */
         ProfileInput: {
             /** Name */
@@ -730,6 +912,8 @@ export interface components {
              * @default []
              */
             socials: components["schemas"]["SocialInput"][];
+            /** Resume Url */
+            resume_url?: string | null;
         };
         /** ProfileOut */
         ProfileOut: {
@@ -748,6 +932,8 @@ export interface components {
             phone: components["schemas"]["PhoneOut"] | null;
             /** Socials */
             socials: components["schemas"]["SocialOut"][];
+            /** Resume Url */
+            resume_url: string | null;
         };
         /** ProjectInput */
         ProjectInput: {
@@ -883,13 +1069,19 @@ export interface components {
         };
         /** UploadRequest */
         UploadRequest: {
+            /**
+             * Purpose
+             * @default project_image
+             * @enum {string}
+             */
+            purpose: "project_image" | "resume";
             /** Filename */
             filename: string;
             /**
              * Content Type
              * @enum {string}
              */
-            content_type: "image/png" | "image/jpeg" | "image/webp" | "image/avif";
+            content_type: "image/png" | "image/jpeg" | "image/webp" | "image/avif" | "application/pdf";
             /** Size */
             size: number;
         };
@@ -1033,6 +1225,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthStatus"];
+                };
+            };
+        };
+    };
+    sitemap_sitemap_xml_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sitemap (sitemaps.org 0.9 urlset) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/xml": string;
                 };
             };
         };
@@ -2274,6 +2486,263 @@ export interface operations {
             };
             /** @description Uploads not configured */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_pitch_runs_api_v1_admin_pitches_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+                q?: string | null;
+                outcome?: ("completed" | "cached" | "timeout" | "upstream_error" | "internal_error" | "disconnected") | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PitchRunList"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not a superuser, or CSRF check failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    pitch_stats_api_v1_admin_pitches_stats_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PitchStats"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not a superuser, or CSRF check failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_pitch_run_api_v1_admin_pitches__run_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PitchRunDetail"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not a superuser, or CSRF check failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unknown id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    delete_pitch_run_api_v1_admin_pitches__run_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not a superuser, or CSRF check failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unknown id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };

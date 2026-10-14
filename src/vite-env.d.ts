@@ -7,6 +7,8 @@ interface ImportMetaEnv {
   readonly VITE_TURNSTILE_SITE_KEY?: string;
   /** "true" turns on the live Pitch Me demo. Anything else keeps the "coming soon" panel. */
   readonly VITE_PITCH_ENABLED?: string;
+  /** Public origin of the site for canonical/Open Graph URLs. Default https://aashish-regmi.com.np */
+  readonly VITE_SITE_URL?: string;
 }
 
 interface ImportMeta {

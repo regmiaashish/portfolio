@@ -37,6 +37,7 @@ In development the app calls the backend at `http://localhost:8001` (set in the 
 | `npm run test:watch` | Run tests in watch mode |
 | `npm run check` | Typecheck, lint and test |
 | `npm run gen:api` | Regenerate `src/lib/api-types.ts` from the backend's OpenAPI schema |
+| `npm run gen:brand` | Regenerate `public/og-image.png` and the PNG icons from `src/data/profile.ts` (needs Google Chrome; `CHROME_PATH` overrides `/usr/bin/google-chrome`) |
 
 `gen:api` reads `http://localhost:8001/openapi.json` by default, so the backend must be running
 with `ENV=dev` (the schema is hidden in production). To use another source, set `OPENAPI_URL`, for
@@ -48,6 +49,7 @@ example `OPENAPI_URL=./openapi.json npm run gen:api`.
 |---|---|---|
 | `VITE_API_URL` | Yes | Base URL of the backend, no trailing slash. `vite build` fails if it is missing. |
 | `VITE_TURNSTILE_SITE_KEY` | No | Cloudflare Turnstile site key. When set, the contact form shows the Turnstile check and sends its token; when unset (local development, tests), the form works without it. The backend's `TURNSTILE_SECRET` must be set to the matching secret. |
+| `VITE_SITE_URL` | No | Public origin used for canonical and Open Graph URLs. Defaults to `https://aashish-regmi.com.np`. |
 | `VITE_PITCH_ENABLED` | No | Set to `true` to turn on the live Pitch Me demo. Anything else (or unset) keeps the disabled "coming soon" panel, and nothing calls the pitch endpoint. Enable it only once the backend's Pitch Me cost controls are live (`PITCH_ENABLED=true`, Turnstile, daily cap). |
 
 Development uses `.env.development`. Production builds read `.env.production` (not committed) or
@@ -95,6 +97,20 @@ Public pages read content from `GET /api/v1/content` and fall back to the snapsh
 `src/data/*` if the API is unavailable, so the site never renders empty. The admin signs in with
 the backend's super-admin account (HttpOnly cookies), so the API's `ALLOWED_ORIGINS` must list
 this site's exact origin.
+
+## SEO
+
+- `index.html`'s title, description, canonical URL, Open Graph and Twitter tags, and JSON-LD
+  `Person` data are injected at build time from `src/data/profile.ts` by `vite/seo.ts`, which also
+  preloads the heading font. `usePageMeta()` keeps title, description, canonical and Open Graph
+  tags in step as you navigate.
+- Link previews (Slack, LinkedIn, X, WhatsApp) read only those static tags, because their crawlers
+  don't run JavaScript. Every page therefore previews with the site card (`public/og-image.png`);
+  per-project previews would need prerendering, which is deferred.
+- `public/robots.txt` hides `/admin` and points to the API's sitemap
+  (`https://api.aashish-regmi.com.np/sitemap.xml`), which lists every published project.
+- After changing your name, role, tagline or location, run `npm run gen:brand` and commit the
+  new images.
 
 ## Deployment
 

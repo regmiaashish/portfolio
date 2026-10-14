@@ -21,4 +21,6 @@ export const profile: Profile = {
     },
     { kind: "instagram", label: "Instagram", href: "https://www.instagram.com/regs.exe" },
   ],
+  // Uploaded or linked from /admin; nothing bundled.
+  resume_url: null,
 };
