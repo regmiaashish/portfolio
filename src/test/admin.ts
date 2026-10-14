@@ -79,14 +79,29 @@ export function mockAdminApi(
   return { fetchMock, content, calls };
 }
 
-/** Records presigned-POST uploads instead of sending them. */
+/** The API's 201 body for `POST /api/v1/admin/uploads/file` (an image by default). */
+export const UPLOADED_IMAGE = {
+  key: "portfolio/projects/3f2a.png",
+  public_url: "https://portfolio-bucket.s3.ap-south-1.amazonaws.com/portfolio/projects/3f2a.png",
+  content_type: "image/png",
+  size: 2048,
+};
+
+/** Records multipart uploads to the API instead of sending them. */
 export class FakeXHR {
   static instances: FakeXHR[] = [];
-  static status = 204;
+  static status = 201;
+  static responseBody: unknown = UPLOADED_IMAGE;
+  static networkError = false;
+  /** Per-request responses, used in order before falling back to status/responseBody. */
+  static queue: { status: number; body: unknown }[] = [];
   method = "";
   url = "";
   body: FormData | null = null;
   status = 0;
+  responseText = "";
+  withCredentials = false;
+  headers: Record<string, string> = {};
   upload: { onprogress: ((event: { lengthComputable: boolean; loaded: number; total: number }) => void) | null } = {
     onprogress: null,
   };
@@ -98,12 +113,22 @@ export class FakeXHR {
     this.url = url;
   }
 
+  setRequestHeader(name: string, value: string) {
+    this.headers[name] = value;
+  }
+
   send(body: FormData) {
     this.body = body;
     FakeXHR.instances.push(this);
     queueMicrotask(() => {
+      if (FakeXHR.networkError) {
+        this.onerror?.();
+        return;
+      }
       this.upload.onprogress?.({ lengthComputable: true, loaded: 5, total: 10 });
-      this.status = FakeXHR.status;
+      const next = FakeXHR.queue.shift() ?? { status: FakeXHR.status, body: FakeXHR.responseBody };
+      this.status = next.status;
+      this.responseText = next.body === undefined ? "" : JSON.stringify(next.body);
       this.onload?.();
     });
   }
@@ -111,7 +136,10 @@ export class FakeXHR {
 
 export function installFakeXHR() {
   FakeXHR.instances = [];
-  FakeXHR.status = 204;
+  FakeXHR.status = 201;
+  FakeXHR.responseBody = UPLOADED_IMAGE;
+  FakeXHR.networkError = false;
+  FakeXHR.queue = [];
   vi.stubGlobal("XMLHttpRequest", FakeXHR);
 }
 

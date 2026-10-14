@@ -1,8 +1,8 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { FakeXHR, installFakeXHR, mockAdminApi } from "../test/admin";
+import { FakeXHR, UPLOADED_IMAGE, installFakeXHR, mockAdminApi } from "../test/admin";
 import { optimiseImage } from "./images";
 import { jsonResponse } from "../test/fetch";
 import { renderApp } from "../test/render";
@@ -15,19 +15,6 @@ vi.mock("./images", async (importOriginal) => {
     optimiseImage: vi.fn(async (file: File) => ({ file, width: 1200, height: 750, changed: false })),
   };
 });
-
-const TICKET = {
-  url: "https://portfolio-bucket.s3.amazonaws.com/",
-  fields: {
-    key: "portfolio/projects/3f2a.png",
-    "Content-Type": "image/png",
-    policy: "eyJleHBpcmF0aW9uIjoi...",
-    "x-amz-signature": "abc123",
-  },
-  key: "portfolio/projects/3f2a.png",
-  public_url: "https://portfolio-bucket.s3.amazonaws.com/portfolio/projects/3f2a.png",
-  max_bytes: 5 * 1024 * 1024,
-};
 
 function png(size = 2048, name = "screenshot.png", type = "image/png") {
   return new File([new Uint8Array(size)], name, { type });
@@ -44,11 +31,16 @@ beforeEach(() => {
   vi.mocked(optimiseImage).mockClear();
 });
 
+afterEach(() => {
+  vi.restoreAllMocks(); // undo per-test spies such as the gated XHR send
+});
+
+const UPLOAD_URL = "https://api.test.example/api/v1/admin/uploads/file";
+
 describe("image upload", () => {
-  it("presigns, uploads straight to S3 (fields before file) and saves the key with the size", async () => {
+  it("uploads through the API (credentials, CSRF header, purpose then file) and saves the key", async () => {
     const user = userEvent.setup({ applyAccept: false });
-    const { calls } = mockAdminApi({
-      "POST /api/v1/admin/uploads": () => jsonResponse(200, TICKET),
+    const { calls, fetchMock } = mockAdminApi({
       "POST /api/v1/admin/projects": () => jsonResponse(201, {}),
     });
     renderApp("/admin/projects/new");
@@ -57,35 +49,59 @@ describe("image upload", () => {
     await user.upload(screen.getByLabelText("Upload an image"), png());
 
     const preview = await screen.findByRole("img", { name: "Uploaded image preview" });
-    expect(preview).toHaveAttribute("src", TICKET.public_url);
-
-    const [presign] = calls("POST", "/api/v1/admin/uploads");
-    expect(presign.body).toEqual({
-      filename: "screenshot.png",
-      content_type: "image/png",
-      size: 2048,
-      purpose: "project_image",
-    });
-    expect(presign.headers["X-Requested-With"]).toBe("portfolio-admin");
+    expect(preview).toHaveAttribute("src", UPLOADED_IMAGE.public_url);
 
     expect(FakeXHR.instances).toHaveLength(1);
     const [xhr] = FakeXHR.instances;
     expect(xhr.method).toBe("POST");
-    expect(xhr.url).toBe(TICKET.url);
-    const names = [...xhr.body!.keys()];
-    expect(names).toEqual([...Object.keys(TICKET.fields), "file"]); // S3 requires file last
+    expect(xhr.url).toBe(UPLOAD_URL);
+    expect(xhr.withCredentials).toBe(true);
+    expect(xhr.headers["X-Requested-With"]).toBe("portfolio-admin");
+    expect([...xhr.body!.keys()]).toEqual(["purpose", "file"]);
+    expect(xhr.body!.get("purpose")).toBe("project_image");
     expect((xhr.body!.get("file") as File).name).toBe("screenshot.png");
+    // Nothing goes to S3 from the browser, and the old presign endpoint is unused.
+    const urls = [...fetchMock.mock.calls.map(([input]) => String(input)), xhr.url];
+    expect(urls.some((url) => url.includes("amazonaws.com"))).toBe(false);
+    expect(calls("POST", "/api/v1/admin/uploads")).toHaveLength(0);
 
     await user.type(screen.getByLabelText("Alt text"), "The dashboard home screen");
     await user.click(screen.getByRole("button", { name: "Create project" }));
 
     await screen.findByText(/Saved “Image project”/);
     expect(calls("POST", "/api/v1/admin/projects")[0].body.image).toEqual({
-      key: TICKET.key,
+      key: UPLOADED_IMAGE.key,
       alt: "The dashboard home screen",
       width: 1200,
       height: 750,
     });
+  });
+
+  it("shows upload progress while the file is sent", async () => {
+    const user = userEvent.setup({ applyAccept: false });
+    mockAdminApi();
+    let release: () => void = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    vi.spyOn(FakeXHR.prototype, "send").mockImplementation(function (this: FakeXHR, body: FormData) {
+      this.body = body;
+      FakeXHR.instances.push(this);
+      this.upload.onprogress?.({ lengthComputable: true, loaded: 4, total: 10 });
+      void gate.then(() => {
+        this.status = 201;
+        this.responseText = JSON.stringify(UPLOADED_IMAGE);
+        this.onload?.();
+      });
+    });
+    renderApp("/admin/projects/new");
+
+    await user.upload(await screen.findByLabelText("Upload an image"), png());
+
+    const bar = (await screen.findByLabelText("Upload progress")) as HTMLProgressElement;
+    expect(bar.value).toBeCloseTo(0.4);
+    release();
+    await screen.findByRole("img", { name: "Uploaded image preview" });
   });
 
   it("uploads the optimised WebP (type, size, name and dimensions) when it's smaller", async () => {
@@ -97,10 +113,8 @@ describe("image upload", () => {
       height: 1200,
       changed: true,
     });
-    const { calls } = mockAdminApi({
-      "POST /api/v1/admin/uploads": () =>
-        jsonResponse(200, { ...TICKET, key: "portfolio/projects/3f2a.webp" }),
-    });
+    FakeXHR.responseBody = { ...UPLOADED_IMAGE, key: "portfolio/projects/3f2a.webp" };
+    mockAdminApi();
     renderApp("/admin/projects/new");
     await fillRequiredFields(user);
 
@@ -111,18 +125,15 @@ describe("image upload", () => {
     );
 
     expect(await screen.findByText(/Optimised for the web: 1600×1200 WebP, 7.0 MB → 879 KB/)).toBeInTheDocument();
-    expect(calls("POST", "/api/v1/admin/uploads")[0].body).toEqual({
-      filename: "camera.webp",
-      content_type: "image/webp",
-      size: 900_000,
-      purpose: "project_image",
-    });
-    expect((FakeXHR.instances[0].body!.get("file") as File).type).toBe("image/webp");
+    const file = FakeXHR.instances[0].body!.get("file") as File;
+    expect(file.type).toBe("image/webp");
+    expect(file.name).toBe("camera.webp");
+    expect(file.size).toBe(900_000);
   });
 
   it("rejects an image too large to process, before decoding it", async () => {
     const user = userEvent.setup({ applyAccept: false });
-    const { calls } = mockAdminApi();
+    mockAdminApi();
     renderApp("/admin/projects/new");
 
     await user.upload(
@@ -132,12 +143,12 @@ describe("image upload", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent(/too large to process/);
     expect(optimiseImage).not.toHaveBeenCalled();
-    expect(calls("POST", "/api/v1/admin/uploads")).toHaveLength(0);
+    expect(FakeXHR.instances).toHaveLength(0);
   });
 
   it("requires alt text once an image is attached", async () => {
     const user = userEvent.setup({ applyAccept: false });
-    const { calls } = mockAdminApi({ "POST /api/v1/admin/uploads": () => jsonResponse(200, TICKET) });
+    const { calls } = mockAdminApi();
     renderApp("/admin/projects/new");
     await fillRequiredFields(user);
 
@@ -154,26 +165,24 @@ describe("image upload", () => {
     ["an oversize file", png(5 * 1024 * 1024 + 1), /5 MB or smaller/],
   ])("rejects %s before asking the server", async (_name, file, message) => {
     const user = userEvent.setup({ applyAccept: false });
-    const { calls } = mockAdminApi();
+    mockAdminApi();
     renderApp("/admin/projects/new");
 
     await user.upload(await screen.findByLabelText("Upload an image"), file);
 
     expect(await screen.findByRole("alert")).toHaveTextContent(message);
-    expect(calls("POST", "/api/v1/admin/uploads")).toHaveLength(0);
     expect(FakeXHR.instances).toHaveLength(0);
   });
 
-  it("explains when uploads aren't configured on the server", async () => {
+  it("explains when uploads aren't configured on the server (503 uploads_disabled)", async () => {
     const user = userEvent.setup({ applyAccept: false });
-    mockAdminApi({
-      "POST /api/v1/admin/uploads": () =>
-        jsonResponse(503, {
-          success: false,
-          message: "Uploads are disabled.",
-          errors: { code: "uploads_disabled" },
-        }),
-    });
+    mockAdminApi();
+    FakeXHR.status = 503;
+    FakeXHR.responseBody = {
+      success: false,
+      message: "Uploads are not configured.",
+      errors: { code: "uploads_disabled" },
+    };
     renderApp("/admin/projects/new");
 
     await user.upload(await screen.findByLabelText("Upload an image"), png());
@@ -181,44 +190,55 @@ describe("image upload", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(/aren't configured on the server/);
   });
 
-  it("reports an upload rejected by S3", async () => {
+  it("shows the server's field error for a rejected file (422 on file)", async () => {
     const user = userEvent.setup({ applyAccept: false });
-    mockAdminApi({ "POST /api/v1/admin/uploads": () => jsonResponse(200, TICKET) });
-    FakeXHR.status = 403;
+    mockAdminApi();
+    FakeXHR.status = 422;
+    FakeXHR.responseBody = {
+      success: false,
+      message: "Request validation failed.",
+      errors: [
+        { loc: ["body", "file"], msg: "Value error, The file isn't a PNG, JPEG, WebP or AVIF image.", type: "value_error" },
+      ],
+    };
     renderApp("/admin/projects/new");
 
     await user.upload(await screen.findByLabelText("Upload an image"), png());
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(/rejected by S3 \(HTTP 403\)/);
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("The file isn't a PNG, JPEG, WebP or AVIF image.");
+    expect(alert).not.toHaveTextContent("Value error");
     expect(screen.queryByRole("img", { name: "Uploaded image preview" })).not.toBeInTheDocument();
   });
-});
 
-describe("s3RejectionMessage", () => {
-  it("names S3's error code and the likely fix", async () => {
-    const { s3RejectionMessage } = await import("./api");
-    const xml =
-      '<?xml version="1.0" encoding="UTF-8"?><Error><Code>AccessDenied</Code><Message>Access Denied</Message></Error>';
+  it("refreshes an expired session once and retries the upload", async () => {
+    const user = userEvent.setup({ applyAccept: false });
+    const { calls } = mockAdminApi({
+      "POST /api/v1/auth/refresh": () => jsonResponse(200, { success: true, message: "ok", data: null }),
+    });
+    FakeXHR.queue = [
+      { status: 401, body: { success: false, message: "Invalid or expired token.", errors: null } },
+      { status: 201, body: UPLOADED_IMAGE },
+    ];
+    renderApp("/admin/projects/new");
 
-    const message = s3RejectionMessage(403, xml);
+    await user.upload(await screen.findByLabelText("Upload an image"), png());
 
-    expect(message).toContain("AccessDenied (Access Denied)");
-    expect(message).toContain("s3:PutObject");
+    await screen.findByRole("img", { name: "Uploaded image preview" });
+    expect(FakeXHR.instances).toHaveLength(2);
+    expect(calls("POST", "/api/v1/auth/refresh")).toHaveLength(1);
   });
 
-  it("explains a region mismatch", async () => {
-    const { s3RejectionMessage } = await import("./api");
+  it("explains a network failure without mentioning bucket CORS", async () => {
+    const user = userEvent.setup({ applyAccept: false });
+    mockAdminApi();
+    FakeXHR.networkError = true;
+    renderApp("/admin/projects/new");
 
-    expect(s3RejectionMessage(301, "<Error><Code>PermanentRedirect</Code></Error>")).toContain(
-      "AWS_REGION",
-    );
-  });
+    await user.upload(await screen.findByLabelText("Upload an image"), png());
 
-  it("falls back to the status when S3 sends no XML", async () => {
-    const { s3RejectionMessage } = await import("./api");
-
-    expect(s3RejectionMessage(500, "")).toBe(
-      "The upload was rejected by S3 (HTTP 500). Please try again.",
-    );
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("couldn't reach the server");
+    expect(alert).not.toHaveTextContent(/CORS|S3/);
   });
 });

@@ -3,7 +3,14 @@
  * CSRF header the backend requires on mutating admin requests. A 401 triggers one silent
  * `POST /api/v1/auth/refresh`; if that fails too, listeners are told the session expired.
  */
-import { ApiError, type RequestOptions, request } from "../lib/api";
+import {
+  API_URL,
+  ApiError,
+  apiErrorFromResponse,
+  errorCode,
+  type RequestOptions,
+  request,
+} from "../lib/api";
 import type {
   AdminCareerEntry,
   AdminContent,
@@ -18,9 +25,10 @@ import type {
   Profile,
   ProjectInput,
   SkillGroupInput,
-  UploadRequest,
-  UploadTicket,
+  UploadedFile,
+  UploadPurpose,
 } from "../lib/cmsContracts";
+import { safeFilename } from "./validation";
 
 export const CSRF_HEADER = { "X-Requested-With": "portfolio-admin" } as const;
 
@@ -58,14 +66,15 @@ function isUnauthorized(error: unknown): error is ApiError {
   return error instanceof ApiError && error.status === 401;
 }
 
-export async function adminRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
+/** Runs `call`; on 401, refreshes the session once and retries, else reports expiry. */
+async function withSessionRetry<T>(call: () => Promise<T>): Promise<T> {
   try {
-    return await request<T>(path, baseOptions(options));
+    return await call();
   } catch (error) {
     if (!isUnauthorized(error)) throw error;
     if (await refreshSession()) {
       try {
-        return await request<T>(path, baseOptions(options));
+        return await call();
       } catch (retryError) {
         if (isUnauthorized(retryError)) expiryListeners.forEach((listener) => listener());
         throw retryError;
@@ -74,6 +83,10 @@ export async function adminRequest<T>(path: string, options: RequestOptions = {}
     expiryListeners.forEach((listener) => listener());
     throw error;
   }
+}
+
+export function adminRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  return withSessionRetry(() => request<T>(path, baseOptions(options)));
 }
 
 // --- Session ---------------------------------------------------------------------
@@ -147,9 +160,6 @@ export const adminApi = {
   orderSkillGroups: (ids: string[]) =>
     adminRequest<void>("/api/v1/admin/skills/order", { method: "PUT", body: { ids } }),
 
-  presignUpload: (upload: UploadRequest) =>
-    adminRequest<UploadTicket>("/api/v1/admin/uploads", { method: "POST", body: upload }),
-
   pitchStats: (signal?: AbortSignal) =>
     adminRequest<PitchStats>("/api/v1/admin/pitches/stats", { signal }),
   listPitches: (query: PitchListQuery, signal?: AbortSignal) =>
@@ -176,62 +186,79 @@ export function pitchListParams({ limit, offset, q, outcome }: PitchListQuery): 
   return params.toString();
 }
 
-// --- Direct-to-S3 upload -----------------------------------------------------------
+// --- Uploads through the API ------------------------------------------------------
 
-/**
- * Sends the file straight to S3 with the presigned POST (fields first, file last, as S3
- * requires). XMLHttpRequest rather than fetch because only XHR reports upload progress.
- */
-export function uploadToS3(
-  ticket: UploadTicket,
+export const UPLOAD_PATH = "/api/v1/admin/uploads/file";
+
+export const UPLOAD_NETWORK_MESSAGE =
+  "The upload couldn't reach the server. Check your connection and try again.";
+
+/** One multipart POST to the API, which stores the file in S3 server-side. */
+function sendUpload(
   file: File,
+  purpose: UploadPurpose,
   onProgress?: (fraction: number) => void,
-): Promise<void> {
+): Promise<UploadedFile> {
   return new Promise((resolve, reject) => {
     const form = new FormData();
-    for (const [name, value] of Object.entries(ticket.fields)) form.append(name, value);
-    form.append("file", file);
+    form.append("purpose", purpose);
+    form.append("file", file, safeFilename(file.name));
 
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", ticket.url);
+    xhr.open("POST", `${API_URL}${UPLOAD_PATH}`);
+    xhr.withCredentials = true;
+    for (const [name, value] of Object.entries(CSRF_HEADER)) xhr.setRequestHeader(name, value);
+    xhr.setRequestHeader("Accept", "application/json");
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable && onProgress) onProgress(event.loaded / event.total);
     };
     xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) resolve();
-      else reject(new Error(s3RejectionMessage(xhr.status, xhr.responseText)));
-    };
-    // No HTTP response at all: offline, or (most often) the bucket's CORS rules don't allow
-    // this site's origin, so the browser blocks the request before S3 can answer.
-    xhr.onerror = () =>
-      reject(
-        new Error(
-          `The upload couldn't reach S3. Check your connection; if it persists, the bucket's CORS ` +
-            `rules must allow POST from ${window.location.origin}.`,
-        ),
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          resolve(JSON.parse(xhr.responseText) as UploadedFile);
+        } catch {
+          reject(new ApiError(xhr.status, "The server sent an unexpected response."));
+        }
+        return;
+      }
+      // Same error parsing as every other API call (message + field errors + code).
+      const status = xhr.status >= 200 && xhr.status <= 599 ? xhr.status : 500;
+      apiErrorFromResponse(new Response(xhr.responseText || null, { status })).then(reject, () =>
+        reject(new ApiError(status, "The upload failed.")),
       );
+    };
+    xhr.onerror = () => reject(new ApiError(0, UPLOAD_NETWORK_MESSAGE));
     xhr.send(form);
   });
 }
 
-const S3_HINTS: Record<string, string> = {
-  AccessDenied: "the AWS key needs s3:PutObject on the upload folder, and the bucket policy must allow it",
-  PermanentRedirect: "AWS_REGION on the server doesn't match the bucket's region",
-  AuthorizationHeaderMalformed: "AWS_REGION on the server doesn't match the bucket's region",
-  SignatureDoesNotMatch: "the AWS secret key on the server is wrong",
-  InvalidAccessKeyId: "the AWS access key on the server is wrong or deleted",
-  EntityTooLarge: "the file is larger than the upload limit",
-  NoSuchBucket: "S3_BUCKET_NAME on the server doesn't exist",
-};
+/**
+ * Uploads a file through the API (XMLHttpRequest, because only XHR reports upload progress).
+ * Sends the session cookies and the CSRF header; a 401 refreshes the session once, like
+ * adminRequest.
+ */
+export function uploadViaApi(
+  file: File,
+  purpose: UploadPurpose,
+  onProgress?: (fraction: number) => void,
+): Promise<UploadedFile> {
+  return withSessionRetry(() => sendUpload(file, purpose, onProgress));
+}
 
-/** Turns S3's XML error body into a message that says what to fix. */
-export function s3RejectionMessage(status: number, body: string): string {
-  const code = /<Code>([^<]+)<\/Code>/.exec(body)?.[1];
-  const detail = /<Message>([^<]+)<\/Message>/.exec(body)?.[1];
-  if (!code) return `The upload was rejected by S3 (HTTP ${status}). Please try again.`;
-  const hint = S3_HINTS[code];
-  return (
-    `S3 rejected the upload: ${code}${detail ? ` (${detail})` : ""}.` +
-    (hint ? ` Likely cause: ${hint}.` : "")
-  );
+/** What to show for a failed upload: the server's field error on `file` when it sent one. */
+export function uploadErrorMessage(reason: unknown, notConfigured: string): string {
+  if (reason instanceof ApiError) {
+    if (errorCode(reason) === "uploads_disabled") return notConfigured;
+    if (Array.isArray(reason.errors)) {
+      for (const item of reason.errors) {
+        if (!item || typeof item !== "object") continue;
+        const { loc, msg } = item as { loc?: unknown; msg?: unknown };
+        if (Array.isArray(loc) && loc[loc.length - 1] === "file" && typeof msg === "string") {
+          return msg.replace(/^Value error, /, "");
+        }
+      }
+    }
+    return reason.message;
+  }
+  return reason instanceof Error ? reason.message : "The upload failed.";
 }

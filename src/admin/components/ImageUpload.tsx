@@ -2,17 +2,10 @@ import { type ChangeEvent, useId, useState } from "react";
 
 import fieldStyles from "../../components/ui/Field.module.css";
 import { Button } from "../../components/ui/Button";
-import { ApiError, errorCode } from "../../lib/api";
-import type { UploadRequest } from "../../lib/cmsContracts";
-import { adminApi, uploadToS3 } from "../api";
+import { uploadErrorMessage, uploadViaApi } from "../api";
 import styles from "../Admin.module.css";
 import { MAX_IMAGE_WIDTH, MAX_SOURCE_BYTES, optimiseImage } from "../images";
-import {
-  ALLOWED_IMAGE_TYPES,
-  DEFAULT_MAX_UPLOAD_BYTES,
-  safeFilename,
-  validateImageFile,
-} from "../validation";
+import { ALLOWED_IMAGE_TYPES, DEFAULT_MAX_UPLOAD_BYTES, validateImageFile } from "../validation";
 
 function formatBytes(bytes: number): string {
   return bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} MB` : `${Math.round(bytes / 1024)} KB`;
@@ -33,8 +26,8 @@ interface ImageUploadProps {
 }
 
 /**
- * Picks an image, checks it locally, asks the API for a presigned POST, then uploads the
- * file straight to S3 with a progress bar. The API never receives the file itself.
+ * Picks an image, checks and optimises it locally, then uploads it through the API (which
+ * stores it in S3) with a progress bar.
  */
 export function ImageUpload({ value, alt, onChange, error }: ImageUploadProps) {
   const id = useId();
@@ -67,16 +60,7 @@ export function ImageUpload({ value, alt, onChange, error }: ImageUploadProps) {
       const upload = optimised.file;
       const problem = validateImageFile(upload, DEFAULT_MAX_UPLOAD_BYTES);
       if (problem) throw new Error(problem);
-      const ticket = await adminApi.presignUpload({
-        filename: safeFilename(upload.name),
-        // Safe: validateImageFile above only lets the four allowed image types through.
-        content_type: upload.type as UploadRequest["content_type"],
-        size: upload.size,
-        purpose: "project_image",
-      });
-      const serverProblem = validateImageFile(upload, ticket.max_bytes);
-      if (serverProblem) throw new Error(serverProblem);
-      await uploadToS3(ticket, upload, setProgress);
+      const uploaded = await uploadViaApi(upload, "project_image", setProgress);
       if (optimised.changed) {
         setNote(
           `Optimised for the web: ${optimised.width}×${optimised.height} WebP, ` +
@@ -84,17 +68,15 @@ export function ImageUpload({ value, alt, onChange, error }: ImageUploadProps) {
         );
       }
       onChange({
-        key: ticket.key,
-        url: ticket.public_url,
+        key: uploaded.key,
+        url: uploaded.public_url,
         width: optimised.width,
         height: optimised.height,
       });
     } catch (reason) {
-      if (reason instanceof ApiError && errorCode(reason) === "uploads_disabled") {
-        setUploadError("Image uploads aren't configured on the server yet (S3 settings).");
-      } else {
-        setUploadError(reason instanceof Error ? reason.message : "The upload failed.");
-      }
+      setUploadError(
+        uploadErrorMessage(reason, "Image uploads aren't configured on the server yet (S3 settings)."),
+      );
     } finally {
       setProgress(null);
     }

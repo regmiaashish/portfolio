@@ -44,8 +44,9 @@ npm run gen:brand      # regenerate public/og-image.png + icons from src/data/pr
 - **The admin lives in `src/admin/`** and is lazy-loaded at `/admin/*`. Admin HTTP goes through
   `src/admin/api.ts` (`adminRequest`/`adminApi`: cookies, the `X-Requested-With` CSRF header,
   one silent refresh on 401). Client validation in `src/admin/validation.ts` mirrors the backend
-  contract (`portfolio-website-backend/docs/ADMIN_CMS_CONTRACT.md`). Images upload straight to S3
-  via a presigned POST (`uploadToS3`, XHR for progress). CMS types live in `src/lib/cmsContracts.ts`,
+  contract (`portfolio-website-backend/docs/ADMIN_CMS_CONTRACT.md`). Images and the résumé upload
+  through the API (`uploadViaApi`: multipart XHR to `/api/v1/admin/uploads/file`, for progress;
+  the API stores the file in S3, so the bucket needs no CORS). CMS types live in `src/lib/cmsContracts.ts`,
   derived from the generated schema.
 - **Head tags**: pages call `usePageMeta({ title, description, robots })`
   (`src/hooks/usePageMeta.ts`); site-wide values come from pure helpers in `src/lib/siteMeta.ts`,

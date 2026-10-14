@@ -3,16 +3,9 @@ import { type ChangeEvent, useId, useState } from "react";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Field";
 import fieldStyles from "../../components/ui/Field.module.css";
-import { ApiError, errorCode } from "../../lib/api";
-import { adminApi, uploadToS3 } from "../api";
+import { uploadErrorMessage, uploadViaApi } from "../api";
 import styles from "../Admin.module.css";
-import {
-  DEFAULT_MAX_UPLOAD_BYTES,
-  LIMITS,
-  RESUME_TYPE,
-  safeFilename,
-  validateResumeFile,
-} from "../validation";
+import { DEFAULT_MAX_UPLOAD_BYTES, LIMITS, RESUME_TYPE, validateResumeFile } from "../validation";
 
 interface ResumeFieldProps {
   value: string | null;
@@ -21,8 +14,8 @@ interface ResumeFieldProps {
 }
 
 /**
- * The résumé link shown on the public site: paste any URL, or upload a PDF straight to S3
- * (presigned POST with purpose "resume"). Saving the profile publishes it.
+ * The résumé link shown on the public site: paste any URL, or upload a PDF through the API
+ * (purpose "resume"; the API stores it in S3). Saving the profile publishes it.
  */
 export function ResumeField({ value, onChange, error }: ResumeFieldProps) {
   const id = useId();
@@ -43,22 +36,15 @@ export function ResumeField({ value, onChange, error }: ResumeFieldProps) {
     }
     try {
       setProgress(0);
-      const ticket = await adminApi.presignUpload({
-        filename: safeFilename(file.name),
-        content_type: RESUME_TYPE,
-        size: file.size,
-        purpose: "resume",
-      });
-      const serverProblem = validateResumeFile(file, ticket.max_bytes);
-      if (serverProblem) throw new Error(serverProblem);
-      await uploadToS3(ticket, file, setProgress);
-      onChange(ticket.public_url);
+      const uploaded = await uploadViaApi(file, "resume", setProgress);
+      onChange(uploaded.public_url);
     } catch (reason) {
-      if (reason instanceof ApiError && errorCode(reason) === "uploads_disabled") {
-        setUploadError("Uploads aren't configured on the server yet (S3 settings). Paste a link instead.");
-      } else {
-        setUploadError(reason instanceof Error ? reason.message : "The upload failed.");
-      }
+      setUploadError(
+        uploadErrorMessage(
+          reason,
+          "Uploads aren't configured on the server yet (S3 settings). Paste a link instead.",
+        ),
+      );
     } finally {
       setProgress(null);
     }
