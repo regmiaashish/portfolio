@@ -1,4 +1,4 @@
-import { profile } from "../../data/profile";
+import { useContent } from "../../hooks/useContent";
 import { Container } from "../layout/Container";
 import { Stack } from "../layout/Stack";
 import { ButtonAnchor, ButtonLink } from "../ui/Button";
@@ -7,6 +7,7 @@ import { PitchPanel } from "./PitchPanel";
 import { VisitorGreeting } from "./VisitorGreeting";
 
 export function Hero() {
+  const { profile } = useContent().content;
   return (
     <section aria-labelledby="hero-heading" className={styles.hero}>
       <Container className={styles.layout}>

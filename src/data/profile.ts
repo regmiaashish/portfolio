@@ -1,9 +1,7 @@
-export interface SocialLink {
-  label: "GitHub" | "LinkedIn" | "Instagram";
-  href: string;
-}
+import type { Profile } from "../lib/cmsContracts";
 
-export const profile = {
+/** Bundled fallback for the profile; the live site edits it from /admin. */
+export const profile: Profile = {
   name: "Aashish Regmi",
   role: "Backend & AI engineer",
   location: "Kathmandu, Nepal",
@@ -15,8 +13,12 @@ export const profile = {
   email: "regmiaashish660@gmail.com",
   phone: { display: "+977 9840046034", href: "tel:+9779840046034" },
   socials: [
-    { label: "GitHub", href: "https://github.com/regmiaashish" },
-    { label: "LinkedIn", href: "https://www.linkedin.com/in/aashish-regmi-228868309" },
-    { label: "Instagram", href: "https://www.instagram.com/regs.exe" },
-  ] satisfies SocialLink[],
-} as const;
+    { kind: "github", label: "GitHub", href: "https://github.com/regmiaashish" },
+    {
+      kind: "linkedin",
+      label: "LinkedIn",
+      href: "https://www.linkedin.com/in/aashish-regmi-228868309",
+    },
+    { kind: "instagram", label: "Instagram", href: "https://www.instagram.com/regs.exe" },
+  ],
+};

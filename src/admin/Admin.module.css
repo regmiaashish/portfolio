@@ -1,0 +1,350 @@
+.shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.topbarInner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--header-height);
+}
+
+.brand {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: var(--text-lg);
+}
+
+.topActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.user {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.tabs ul {
+  display: flex;
+  gap: var(--space-1);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  overflow-x: auto;
+}
+
+.tabs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 var(--space-4);
+  border-bottom: 2px solid transparent;
+  color: var(--color-text);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.tabs a[aria-current="page"] {
+  border-bottom-color: var(--color-focus);
+}
+
+.tabs a:hover {
+  background: var(--color-surface-sunken);
+}
+
+.main {
+  flex: 1;
+  padding-block: var(--space-6) var(--space-8);
+}
+
+.pageHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+.status {
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-ok);
+  background: var(--color-surface);
+  border-radius: var(--radius-input);
+}
+
+.alert {
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-err);
+  background: var(--color-surface);
+  border-radius: var(--radius-input);
+  color: var(--color-err-text);
+}
+
+.list {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+}
+
+.rowMain {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.rowTitle {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.rowMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.rowActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.form {
+  display: grid;
+  gap: var(--space-5);
+  max-width: 48rem;
+}
+
+.fieldset {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  min-width: 0;
+}
+
+.fieldset legend {
+  padding: 0 var(--space-2);
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+
+.twoColumns {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@media (min-width: 40rem) {
+  .twoColumns {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.formActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.repeat {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.repeatRow {
+  display: grid;
+  gap: var(--space-3);
+  align-items: end;
+  padding: var(--space-3);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-input);
+}
+
+@media (min-width: 40rem) {
+  .repeatRow {
+    grid-template-columns: 9rem 1fr 2fr auto;
+  }
+
+  .repeatRowSingle {
+    grid-template-columns: 1fr auto;
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding-left: var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  font-size: var(--text-sm);
+}
+
+.chipRemove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  cursor: pointer;
+}
+
+.chipRemove:hover {
+  background: var(--color-surface-sunken);
+}
+
+.imageBox {
+  display: grid;
+  /* minmax(0, …): let the preview shrink instead of widening the column past the card. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+.preview {
+  max-width: min(24rem, 100%);
+  height: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-input);
+  background: var(--color-surface-sunken);
+}
+
+.progress {
+  width: 100%;
+  max-width: 24rem;
+  accent-color: var(--color-focus);
+}
+
+.dialog {
+  max-width: min(28rem, calc(100vw - 2rem));
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.dialog::backdrop {
+  background: color-mix(in srgb, var(--color-text) 45%, transparent);
+}
+
+.dialogActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.danger {
+  color: var(--color-err-text);
+}
+
+.loginCard {
+  width: calc(100% - 2 * var(--gutter));
+  max-width: 26rem;
+  margin: var(--space-8) auto;
+  padding: var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+}
+
+.rowLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  padding: 0 var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  border-radius: var(--radius-input);
+}
+
+.rowLink:hover {
+  background: var(--color-surface-sunken);
+}
+
+/* Admin headings are working titles, not the public site's display type. */
+.loginCard h1,
+.main h1 {
+  font-size: var(--text-2xl);
+}
+
+.loginCard .form {
+  margin-top: var(--space-5);
+}
+
+@media (max-width: 29.99rem) {
+  /* Brand and actions on one row; the "Signed in as" note is secondary on phones. */
+  .user {
+    display: none;
+  }
+
+  .tabs ul {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+
+  .tabs a {
+    padding: 0 var(--space-3);
+  }
+
+  /* Two tidy rows on phones: reorder buttons, then Edit and Delete. */
+  .rowActions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    gap: var(--space-1);
+    justify-items: start;
+  }
+}

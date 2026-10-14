@@ -1,8 +1,10 @@
-import type { SocialLink } from "../../data/profile";
+import type { SocialKind } from "../../lib/cmsContracts";
 import type { IconName } from "./Icon";
 
-export const SOCIAL_ICONS: Record<SocialLink["label"], IconName> = {
-  GitHub: "github",
-  LinkedIn: "linkedin",
-  Instagram: "instagram",
+export const SOCIAL_ICONS: Record<SocialKind, IconName> = {
+  github: "github",
+  linkedin: "linkedin",
+  instagram: "instagram",
+  x: "x",
+  website: "website",
 };

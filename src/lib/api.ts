@@ -128,5 +128,7 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   }
 
   if (!response.ok) throw await apiErrorFromResponse(response);
-  return (await readBody(response)) as T;
+  // 204 No Content (and any other empty success body) resolves to undefined.
+  const data = await readBody(response);
+  return (data === null ? undefined : data) as T;
 }
