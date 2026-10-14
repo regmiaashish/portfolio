@@ -85,6 +85,12 @@ describe("request", () => {
     await expect(request("/x")).rejects.toMatchObject({ status: 429 });
   });
 
+  it("resolves 204 No Content to undefined", async () => {
+    mockFetch(async () => new Response(null, { status: 204 }));
+
+    await expect(request("/api/v1/admin/projects/1", { method: "DELETE" })).resolves.toBeUndefined();
+  });
+
   it("turns network failures into an ApiError with status 0", async () => {
     mockFetch(async () => {
       throw new TypeError("Failed to fetch");

@@ -1,6 +1,6 @@
 import { type ChangeEvent, type FocusEvent, type FormEvent, useEffect, useRef, useState } from "react";
 
-import { profile } from "../../data/profile";
+import { useContent } from "../../hooks/useContent";
 import { useTheme } from "../../hooks/useTheme";
 import { useTurnstile } from "../../hooks/useTurnstile";
 import { ApiError, request } from "../../lib/api";
@@ -31,6 +31,7 @@ type Status = "idle" | "sending" | "success" | "error";
 
 export function ContactForm() {
   const { theme } = useTheme();
+  const { profile } = useContent().content;
   const turnstile = useTurnstile(import.meta.env.VITE_TURNSTILE_SITE_KEY, theme);
 
   const [values, setValues] = useState<ContactValues>(EMPTY);

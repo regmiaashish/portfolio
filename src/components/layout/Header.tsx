@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 
-import { profile } from "../../data/profile";
+import { useContent } from "../../hooks/useContent";
 import { useTheme } from "../../hooks/useTheme";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
@@ -15,6 +15,7 @@ const NAV_LINKS = [
 ];
 
 export function Header() {
+  const { profile } = useContent().content;
   const { theme, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);

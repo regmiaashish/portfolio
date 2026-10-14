@@ -1,12 +1,13 @@
 import { Link } from "react-router";
 
-import { projects } from "../../data/projects";
+import { useContent } from "../../hooks/useContent";
 import { Section } from "../layout/Section";
 import { Grid } from "../layout/Stack";
 import { ChipList } from "../ui/Chip";
 import styles from "./Work.module.css";
 
 export function Work() {
+  const { projects } = useContent().content;
   return (
     <Section
       id="work"
@@ -20,7 +21,7 @@ export function Work() {
               {project.image && (
                 <img
                   className={styles.image}
-                  src={project.image.src}
+                  src={project.image.url}
                   alt={project.image.alt}
                   width={project.image.width}
                   height={project.image.height}

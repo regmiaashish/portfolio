@@ -1,13 +1,9 @@
-export interface CareerEntry {
-  role: string;
-  company: string;
-  period: string;
-  summary: string;
-}
+import type { CareerEntry } from "../lib/cmsContracts";
 
-/** Most recent first. */
+/** Bundled fallback for the career timeline, most recent first; edited from /admin. */
 export const career: CareerEntry[] = [
   {
+    id: "snapshot-career-fagoon-junior",
     role: "Junior backend developer",
     company: "Fagoon AI",
     period: "Now",
@@ -16,6 +12,7 @@ export const career: CareerEntry[] = [
       "Core contributor to Fagoon Upgrade, an open-source, self-hosted AI platform.",
   },
   {
+    id: "snapshot-career-fagoon-intern",
     role: "Backend developer intern",
     company: "Fagoon AI",
     period: "2026",
@@ -24,6 +21,7 @@ export const career: CareerEntry[] = [
       "integrating ElevenLabs, Twilio and Stripe.",
   },
   {
+    id: "snapshot-career-treeleaf",
     role: "Python / Django intern",
     company: "Treeleaf Technologies",
     period: "2024",

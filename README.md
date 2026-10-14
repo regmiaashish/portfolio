@@ -88,7 +88,13 @@ src/
 |---|---|
 | `/` | Home: hero, pitch panel, work, stack, career, contact |
 | `/work/:slug` | Project case study |
+| `/admin` | Content admin (lazy-loaded, `noindex`): profile, projects, career, skills, image uploads |
 | anything else | Not found |
+
+Public pages read content from `GET /api/v1/content` and fall back to the snapshot bundled from
+`src/data/*` if the API is unavailable, so the site never renders empty. The admin signs in with
+the backend's super-admin account (HttpOnly cookies), so the API's `ALLOWED_ORIGINS` must list
+this site's exact origin.
 
 ## Deployment
 

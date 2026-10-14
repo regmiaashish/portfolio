@@ -22,6 +22,16 @@ Object.defineProperty(window, "matchMedia", {
 window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
 Element.prototype.scrollIntoView = vi.fn();
 
+// jsdom doesn't implement modal dialogs; emulate the open/close state the app relies on.
+if (typeof HTMLDialogElement !== "undefined" && !HTMLDialogElement.prototype.showModal) {
+  HTMLDialogElement.prototype.showModal = function showModal(this: HTMLDialogElement) {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement) {
+    this.removeAttribute("open");
+  };
+}
+
 // No test may reach a real server: unless a test stubs fetch itself, every request
 // fails like an offline network.
 beforeEach(() => {

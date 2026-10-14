@@ -1,4 +1,10 @@
-import { type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes, useId } from "react";
+import {
+  type InputHTMLAttributes,
+  type ReactNode,
+  type SelectHTMLAttributes,
+  type TextareaHTMLAttributes,
+  useId,
+} from "react";
 
 import styles from "./Field.module.css";
 
@@ -73,5 +79,60 @@ export function Textarea({ label, hint, error, id, className, ...rest }: Textare
         {...rest}
       />
     </Chrome>
+  );
+}
+
+type SelectProps = FieldChrome &
+  Omit<SelectHTMLAttributes<HTMLSelectElement>, "children"> & {
+    options: { value: string; label: string }[];
+  };
+
+export function Select({ label, hint, error, id, className, options, ...rest }: SelectProps) {
+  const ids = useFieldIds(id);
+  return (
+    <Chrome label={label} hint={hint} error={error} ids={ids}>
+      <select
+        id={ids.controlId}
+        className={[styles.control, className].filter(Boolean).join(" ")}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={describedBy(hint, error, ids)}
+        {...rest}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </Chrome>
+  );
+}
+
+type CheckboxProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "children"> & {
+  label: ReactNode;
+  hint?: ReactNode;
+};
+
+/** A checkbox with its label to the right and an optional hint below. */
+export function Checkbox({ label, hint, id, className, ...rest }: CheckboxProps) {
+  const ids = useFieldIds(id);
+  return (
+    <div className={[styles.checkboxField, className].filter(Boolean).join(" ")}>
+      <input
+        id={ids.controlId}
+        type="checkbox"
+        className={styles.checkbox}
+        aria-describedby={hint ? ids.hintId : undefined}
+        {...rest}
+      />
+      <label htmlFor={ids.controlId} className={styles.checkboxLabel}>
+        {label}
+      </label>
+      {hint && (
+        <p className={styles.checkboxHint} id={ids.hintId}>
+          {hint}
+        </p>
+      )}
+    </div>
   );
 }

@@ -1,17 +1,16 @@
-import { profile } from "../../data/profile";
+import { useContent } from "../../hooks/useContent";
 import { useVisitorContext } from "../../hooks/useVisitorContext";
 import { buildGreeting, clockIn } from "../../lib/format";
 import { StatusDot } from "../ui/StatusDot";
 import styles from "./VisitorGreeting.module.css";
 
-const MY_CITY = profile.location.split(",")[0];
 const MY_TIMEZONE = "Asia/Kathmandu";
 
 /** Generic greeting for when the context API is unavailable; still useful, never broken. */
-function fallbackGreeting() {
+function fallbackGreeting(myCity: string) {
   const clock = clockIn(MY_TIMEZONE);
   return {
-    primary: `Namaste from ${MY_CITY}.`,
+    primary: `Namaste from ${myCity}.`,
     secondary: clock ? `It's ${clock} here in Nepal (UTC+5:45).` : null,
   };
 }
@@ -22,10 +21,11 @@ function fallbackGreeting() {
  */
 export function VisitorGreeting() {
   const state = useVisitorContext();
+  const myCity = useContent().content.profile.location.split(",")[0];
   const loading = state.status === "loading";
   const greeting = loading
     ? null
-    : (state.status === "ready" ? buildGreeting(state.data, MY_CITY) : null) ?? fallbackGreeting();
+    : (state.status === "ready" ? buildGreeting(state.data, myCity) : null) ?? fallbackGreeting(myCity);
 
   return (
     <div

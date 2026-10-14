@@ -1,4 +1,4 @@
-import { profile } from "../../data/profile";
+import { useContent } from "../../hooks/useContent";
 import { Section } from "../layout/Section";
 import { Icon } from "../ui/Icon";
 import { SOCIAL_ICONS } from "../ui/socialIcons";
@@ -7,6 +7,7 @@ import { ContactForm } from "./ContactForm";
 
 /** The form posts to the API; the email link stays visible as the fallback when it's down. */
 export function Contact() {
+  const { profile } = useContent().content;
   return (
     <Section
       id="contact"
@@ -23,16 +24,18 @@ export function Contact() {
             {profile.email}
           </a>
           <ul className={styles.details}>
-            <li>
-              <a href={profile.phone.href}>
-                <Icon name="phone" />
-                {profile.phone.display}
-              </a>
-            </li>
+            {profile.phone && (
+              <li>
+                <a href={profile.phone.href}>
+                  <Icon name="phone" />
+                  {profile.phone.display}
+                </a>
+              </li>
+            )}
             {profile.socials.map((social) => (
-              <li key={social.label}>
+              <li key={social.href}>
                 <a href={social.href} target="_blank" rel="noopener noreferrer">
-                  <Icon name={SOCIAL_ICONS[social.label]} />
+                  <Icon name={SOCIAL_ICONS[social.kind]} />
                   {social.label}
                   <span className="visually-hidden"> (opens in a new tab)</span>
                 </a>
