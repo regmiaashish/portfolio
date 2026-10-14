@@ -47,6 +47,7 @@ example `OPENAPI_URL=./openapi.json npm run gen:api`.
 | Variable | Required | Notes |
 |---|---|---|
 | `VITE_API_URL` | Yes | Base URL of the backend, no trailing slash. `vite build` fails if it is missing. |
+| `VITE_TURNSTILE_SITE_KEY` | No | Cloudflare Turnstile site key. When set, the contact form shows the Turnstile check and sends its token; when unset (local development, tests), the form works without it. The backend's `TURNSTILE_SECRET` must be set to the matching secret. |
 
 Development uses `.env.development`. Production builds read `.env.production` (not committed) or
 the build environment, e.g. `VITE_API_URL=https://api.aashish-regmi.com.np`.

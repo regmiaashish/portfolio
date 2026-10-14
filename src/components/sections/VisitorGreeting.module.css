@@ -1,0 +1,91 @@
+/*
+ * The greeting resolves after the page has rendered. Its box reserves room for the
+ * longest likely greeting, so the heading below never moves (no layout shift).
+ */
+.greeting {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  min-height: 10rem;
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--color-border);
+}
+
+@media (min-width: 30rem) {
+  .greeting {
+    min-height: 8rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .greeting {
+    min-height: 8.5rem;
+  }
+}
+
+.primary {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+@media (min-width: 30rem) {
+  .primary {
+    font-size: var(--text-lg);
+  }
+}
+
+.primary > :first-child {
+  /* Optically centre the dot on the first line of text. */
+  transform: translateY(-0.1em);
+}
+
+.secondary {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.resolved > * {
+  animation: greet-in var(--duration-base) var(--ease-out) both;
+}
+
+.resolved > :nth-child(2) {
+  animation-delay: 80ms;
+}
+
+@keyframes greet-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.25rem);
+  }
+}
+
+.bar {
+  display: block;
+  height: 1.1rem;
+  margin-block: 0.35rem;
+  border-radius: var(--radius-input);
+  background: var(--color-surface-sunken);
+  animation: shimmer 1.2s ease-in-out infinite alternate;
+}
+
+.bar:nth-child(1) {
+  width: min(28rem, 90%);
+  height: 1.35rem;
+}
+
+.bar:nth-child(2) {
+  width: min(34rem, 100%);
+}
+
+.bar:nth-child(3) {
+  width: min(20rem, 70%);
+}
+
+@keyframes shimmer {
+  to {
+    opacity: 0.55;
+  }
+}
