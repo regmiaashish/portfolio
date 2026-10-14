@@ -36,8 +36,8 @@ export type OrderInput = Schemas["OrderInput"];
 export type UploadRequest = Schemas["UploadRequest"];
 /** "project_image" (default) or "resume" (PDF only). */
 export type UploadPurpose = UploadRequest["purpose"];
-/** `POST /api/v1/admin/uploads`: a presigned S3 POST. */
-export type UploadTicket = Schemas["UploadOut"];
+/** `POST /api/v1/admin/uploads/file` response. */
+export type UploadedFile = Schemas["StoredUploadOut"];
 
 /** `GET /api/v1/auth/me` data. */
 export type AdminUser = Pick<Schemas["UserRead"], "id" | "name" | "email" | "is_active" | "is_superuser">;

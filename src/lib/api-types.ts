@@ -371,6 +371,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/uploads/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upload File
+         * @description Upload through the API: the server checks the file's real type and writes it to S3.
+         *
+         *     The body is parsed here rather than by FastAPI so an oversized request is refused from its
+         *     Content-Length before any of it is read.
+         */
+        post: operations["upload_file_api_v1_admin_uploads_file_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/pitches": {
         parameters: {
             query?: never;
@@ -1071,6 +1094,20 @@ export interface components {
             label: string;
             /** Href */
             href: string;
+        };
+        /**
+         * StoredUploadOut
+         * @description A file stored through POST /admin/uploads/file.
+         */
+        StoredUploadOut: {
+            /** Key */
+            key: string;
+            /** Public Url */
+            public_url: string;
+            /** Content Type */
+            content_type: string;
+            /** Size */
+            size: number;
         };
         /** UploadOut */
         UploadOut: {
@@ -2542,6 +2579,94 @@ export interface operations {
             };
             /** @description Internal server error */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Uploads not configured */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    upload_file_api_v1_admin_uploads_file_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * @default project_image
+                     * @enum {string}
+                     */
+                    purpose?: "project_image" | "resume";
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StoredUploadOut"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not a superuser, or CSRF check failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Wrong file type, empty, or too large */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Storage (S3) rejected the write */
+            502: {
                 headers: {
                     [name: string]: unknown;
                 };

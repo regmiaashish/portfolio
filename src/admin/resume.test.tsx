@@ -9,12 +9,11 @@ import { jsonResponse, mockApi } from "../test/fetch";
 import { renderApp } from "../test/render";
 
 const RESUME_URL = "https://bucket.s3.ap-south-1.amazonaws.com/portfolio/resume/9b1f.pdf";
-const TICKET = {
-  url: "https://bucket.s3.ap-south-1.amazonaws.com/",
-  fields: { key: "portfolio/resume/9b1f.pdf", "Content-Type": "application/pdf", policy: "p", "x-amz-signature": "s" },
+const UPLOADED_PDF = {
   key: "portfolio/resume/9b1f.pdf",
   public_url: RESUME_URL,
-  max_bytes: 5 * 1024 * 1024,
+  content_type: "application/pdf",
+  size: 4096,
 };
 
 const pdf = (size = 4096, name = "Aashish Regmi CV.pdf", type = "application/pdf") =>
@@ -54,10 +53,10 @@ describe("public résumé links", () => {
 });
 
 describe("admin Résumé tab", () => {
-  it("uploads a PDF straight to S3 (purpose resume) and saves its URL with the profile", async () => {
+  it("uploads a PDF through the API (purpose resume) and saves its URL with the profile", async () => {
     const user = userEvent.setup({ applyAccept: false });
+    FakeXHR.responseBody = UPLOADED_PDF;
     const { calls } = mockAdminApi({
-      "POST /api/v1/admin/uploads": () => jsonResponse(200, TICKET),
       "PUT /api/v1/admin/profile": (init) => jsonResponse(200, JSON.parse(String(init?.body))),
     });
     renderApp("/admin/resume");
@@ -65,14 +64,15 @@ describe("admin Résumé tab", () => {
     await user.upload(await screen.findByLabelText("Or upload a PDF"), pdf());
 
     expect(await screen.findByLabelText("Résumé link")).toHaveValue(RESUME_URL);
-    expect(calls("POST", "/api/v1/admin/uploads")[0].body).toEqual({
-      filename: "Aashish Regmi CV.pdf",
-      content_type: "application/pdf",
-      size: 4096,
-      purpose: "resume",
-    });
     const [xhr] = FakeXHR.instances;
-    expect([...xhr.body!.keys()].at(-1)).toBe("file"); // S3 requires the file last
+    expect(xhr.method).toBe("POST");
+    expect(xhr.url).toBe("https://api.test.example/api/v1/admin/uploads/file");
+    expect(xhr.withCredentials).toBe(true);
+    expect(xhr.headers["X-Requested-With"]).toBe("portfolio-admin");
+    expect([...xhr.body!.keys()]).toEqual(["purpose", "file"]);
+    expect(xhr.body!.get("purpose")).toBe("resume");
+    expect((xhr.body!.get("file") as File).name).toBe("Aashish Regmi CV.pdf");
+    expect(calls("POST", "/api/v1/admin/uploads")).toHaveLength(0); // no presign any more
 
     await user.click(screen.getByRole("button", { name: "Save résumé" }));
     await screen.findByText(/Résumé saved/);
@@ -91,6 +91,7 @@ describe("admin Résumé tab", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent(message);
     expect(calls("POST", "/api/v1/admin/uploads")).toHaveLength(0);
+    expect(FakeXHR.instances).toHaveLength(0);
   });
 
   it("accepts a pasted link, validates it, and can remove it", async () => {
