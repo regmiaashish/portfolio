@@ -7,12 +7,14 @@ later phases; this repo currently ships the app shell, design system and content
 
 ## Stack
 
-- React 18, TypeScript, Vite 5
+- React 19, TypeScript 5.9, Vite 8 (Node 22.13+ or 24, which eslint 10 and vitest 5 need; `.nvmrc` pins Node 22 for CI and
+  Cloudflare Workers Builds)
 - react-router 7 (`/work/:slug` case-study pages)
 - CSS Modules on top of design tokens in `src/styles/tokens.css`
 - Self-hosted fonts: Bricolage Grotesque (headings) and Public Sans (body) via `@fontsource-variable`
-- Vitest + Testing Library (jsdom)
-- ESLint with typescript-eslint, react-hooks and jsx-a11y
+- Vitest 5 + Testing Library (jsdom)
+- ESLint 10 with typescript-eslint, react-hooks 7 (React Compiler rules) and
+  `eslint-plugin-jsx-a11y-x` (the maintained fork of jsx-a11y that supports ESLint 10)
 
 ## Getting started
 

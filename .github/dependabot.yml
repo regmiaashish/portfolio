@@ -5,9 +5,25 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    # Packages that only work together get one PR per group, majors included, so a release is
+    # never split into PRs that each fail on their own (e.g. react without react-dom). A package
+    # joins the first group that matches it; everything else is batched by minor-and-patch.
     groups:
+      react:
+        patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
+      vite-toolchain:
+        patterns: ["vite", "@vitejs/plugin-react", "vitest", "jsdom"]
+      eslint:
+        patterns: ["eslint", "@eslint/js", "typescript-eslint", "eslint-plugin-*", "globals"]
       minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      # @types/node follows the Node major the site builds with (.nvmrc: 22).
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # TypeScript 6 waits for openapi-typescript (gen:api), whose peer range is ^5.x.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /

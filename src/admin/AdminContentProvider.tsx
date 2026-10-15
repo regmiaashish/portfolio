@@ -10,24 +10,30 @@ export function AdminContentProvider({ children }: PropsWithChildren) {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [error, setError] = useState<string | null>(null);
 
-  const reload = useCallback(async () => {
-    try {
-      const data = await adminApi.content();
-      setContent(data);
-      setStatus("ready");
-      setError(null);
-    } catch (reason) {
-      setError(toSubmitError(reason).message);
-      setStatus((current) => (current === "ready" ? current : "error"));
-      throw reason;
-    }
+  const loaded = useCallback((data: AdminContent) => {
+    setContent(data);
+    setStatus("ready");
+    setError(null);
   }, []);
 
+  const failed = useCallback((reason: unknown) => {
+    setError(toSubmitError(reason).message);
+    setStatus((current) => (current === "ready" ? current : "error"));
+  }, []);
+
+  const reload = useCallback(async () => {
+    try {
+      loaded(await adminApi.content());
+    } catch (reason) {
+      failed(reason);
+      throw reason;
+    }
+  }, [loaded, failed]);
+
+  // First load. State is only set when the request settles (`failed` shows the error).
   useEffect(() => {
-    reload().catch(() => {
-      // Shown through `status`/`error`.
-    });
-  }, [reload]);
+    adminApi.content().then(loaded, failed);
+  }, [loaded, failed]);
 
   const value = useMemo(() => ({ status, content, error, reload }), [status, content, error, reload]);
   return <AdminContentContext.Provider value={value}>{children}</AdminContentContext.Provider>;

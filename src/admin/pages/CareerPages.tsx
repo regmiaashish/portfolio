@@ -81,7 +81,9 @@ export function CareerFormPage() {
 function CareerForm({ entry }: { entry?: AdminCareerEntry }) {
   const navigate = useNavigate();
   const { reload } = useAdminContent();
-  const form = useEntityForm({
+  // alertRef is kept apart from `form`: the React Compiler treats an object a ref is read from
+  // as a ref, which would make every other form.* read during render an error.
+  const { alertRef, ...form } = useEntityForm({
     initial: {
       role: entry?.role ?? "",
       company: entry?.company ?? "",
@@ -107,7 +109,7 @@ function CareerForm({ entry }: { entry?: AdminCareerEntry }) {
       </div>
       <form className={styles.form} onSubmit={form.onSubmit} noValidate>
         {form.submitError && (
-          <p role="alert" tabIndex={-1} ref={form.alertRef} className={styles.alert}>
+          <p role="alert" tabIndex={-1} ref={alertRef} className={styles.alert}>
             {form.submitError}
           </p>
         )}

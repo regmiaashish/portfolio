@@ -1,4 +1,3 @@
-import { lazy, Suspense } from "react";
 import type { RouteObject } from "react-router";
 
 import { AboutPage } from "../pages/AboutPage";
@@ -10,24 +9,12 @@ import { PitchPage } from "../pages/PitchPage";
 import { ResumePage } from "../pages/ResumePage";
 import { WorkPage } from "../pages/WorkPage";
 import { AppLayout } from "./AppLayout";
-
-// The admin is a separate chunk: visitors never download it.
-const AdminApp = lazy(() => import("../admin/AdminApp"));
+import { LazyAdmin } from "./LazyAdmin";
 
 export const routes: RouteObject[] = [
   {
     path: "admin/*",
-    element: (
-      <Suspense
-        fallback={
-          <p role="status" style={{ padding: "var(--space-6)" }}>
-            Loading the admin…
-          </p>
-        }
-      >
-        <AdminApp />
-      </Suspense>
-    ),
+    element: <LazyAdmin />,
   },
   {
     element: <AppLayout />,

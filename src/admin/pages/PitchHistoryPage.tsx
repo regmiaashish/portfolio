@@ -21,6 +21,7 @@ import {
 } from "../pitchFormat";
 import { useDebouncedValue } from "../useDebouncedValue";
 import { useFlash } from "../useFlash";
+import { useRequestState } from "../useRequestState";
 
 export const PITCH_PAGE_SIZE = 20;
 export const SEARCH_DEBOUNCE_MS = 300;
@@ -52,8 +53,17 @@ export function PitchHistoryPage() {
   const [search, setSearch] = useState(query);
   const debouncedSearch = useDebouncedValue(search.trim(), SEARCH_DEBOUNCE_MS);
   const [reloadKey, setReloadKey] = useState(0);
-  const [list, setList] = useState<Load<PitchRunList>>({ status: "loading" });
-  const [stats, setStats] = useState<Load<PitchStats>>({ status: "loading" });
+  // While a new page or the stats load, the previous data stays on screen.
+  const listRequest = JSON.stringify([page, query, outcome, reloadKey]);
+  const [list, settleList] = useRequestState<Load<PitchRunList>>(listRequest, (previous) => ({
+    status: "loading",
+    data: previous?.data,
+  }));
+  const statsRequest = String(reloadKey);
+  const [stats, settleStats] = useRequestState<Load<PitchStats>>(statsRequest, (previous) => ({
+    status: "loading",
+    data: previous?.data,
+  }));
   const captionId = useId();
 
   const updateParams = useCallback(
@@ -80,32 +90,30 @@ export function PitchHistoryPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    setList((current) => ({ status: "loading", data: current.data }));
     adminApi
       .listPitches(
         { limit: PITCH_PAGE_SIZE, offset: (page - 1) * PITCH_PAGE_SIZE, q: query, outcome },
         controller.signal,
       )
-      .then((data) => setList({ status: "ready", data }))
+      .then((data) => settleList(listRequest, { status: "ready", data }))
       .catch((error: unknown) => {
         if (!isAbort(error)) {
-          setList({ status: "error", error: messageOf(error, "The pitch history couldn't be loaded.") });
+          settleList(listRequest, { status: "error", error: messageOf(error, "The pitch history couldn't be loaded.") });
         }
       });
     return () => controller.abort();
-  }, [page, query, outcome, reloadKey]);
+  }, [page, query, outcome, listRequest, settleList]);
 
   useEffect(() => {
     const controller = new AbortController();
-    setStats((current) => ({ status: "loading", data: current.data }));
     adminApi
       .pitchStats(controller.signal)
-      .then((data) => setStats({ status: "ready", data }))
+      .then((data) => settleStats(statsRequest, { status: "ready", data }))
       .catch((error: unknown) => {
-        if (!isAbort(error)) setStats({ status: "error", error: messageOf(error, "Usage stats couldn't be loaded.") });
+        if (!isAbort(error)) settleStats(statsRequest, { status: "error", error: messageOf(error, "Usage stats couldn't be loaded.") });
       });
     return () => controller.abort();
-  }, [reloadKey]);
+  }, [statsRequest, settleStats]);
 
   const refresh = () => setReloadKey((key) => key + 1);
   const data = list.data;
@@ -189,7 +197,7 @@ export function PitchHistoryPage() {
           role="region"
           aria-labelledby={captionId}
           aria-busy={list.status === "loading"}
-          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+          // eslint-disable-next-line jsx-a11y-x/no-noninteractive-tabindex
           tabIndex={0}
         >
           <table className={styles.table}>

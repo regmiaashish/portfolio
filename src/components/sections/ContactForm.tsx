@@ -32,7 +32,12 @@ type Status = "idle" | "sending" | "success" | "error";
 export function ContactForm() {
   const { theme } = useTheme();
   const { profile } = useContent().content;
-  const turnstile = useTurnstile(import.meta.env.VITE_TURNSTILE_SITE_KEY, theme);
+  // The container setter is kept apart: it's used as a `ref`, and the React Compiler treats any
+  // object a ref is read from as a ref, which would make every other turnstile.* read "unsafe".
+  const { containerRef: turnstileContainer, ...turnstile } = useTurnstile(
+    import.meta.env.VITE_TURNSTILE_SITE_KEY,
+    theme,
+  );
 
   const [values, setValues] = useState<ContactValues>(EMPTY);
   const [errors, setErrors] = useState<ContactErrors>({});
@@ -186,7 +191,7 @@ export function ContactForm() {
         />
       </div>
 
-      {turnstile.enabled && <div ref={turnstile.containerRef} className={styles.turnstile} />}
+      {turnstile.enabled && <div ref={turnstileContainer} className={styles.turnstile} />}
 
       {serverError && (
         <p role="alert" className={styles.alert}>

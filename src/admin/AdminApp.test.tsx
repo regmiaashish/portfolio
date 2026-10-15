@@ -250,6 +250,21 @@ describe("projects", () => {
     expect(calls("POST", "/api/v1/admin/projects")).toHaveLength(0);
   });
 
+  it("moves focus to the error summary on every blocked save", async () => {
+    const user = userEvent.setup();
+    mockAdminApi();
+    renderApp("/admin/projects/new");
+
+    const create = await screen.findByRole("button", { name: "Create project" });
+    await user.click(create);
+    const alert = await screen.findByRole("alert");
+    await waitFor(() => expect(alert).toHaveFocus());
+
+    // Same message the second time: focus still comes back to it.
+    await user.click(create);
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveFocus());
+  });
+
   it("edits a project, keeping its image", async () => {
     const user = userEvent.setup();
     const { calls, content } = mockAdminApi({

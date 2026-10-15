@@ -13,6 +13,7 @@ import { absoluteTime, rangeLabel, relativeTime } from "../pitchFormat";
 import { useMessageStats } from "../unreadMessages";
 import { useDebouncedValue } from "../useDebouncedValue";
 import { useFlash } from "../useFlash";
+import { useRequestState } from "../useRequestState";
 import { SEARCH_DEBOUNCE_MS } from "./PitchHistoryPage";
 
 export const MESSAGE_PAGE_SIZE = 20;
@@ -37,7 +38,12 @@ export function MessagesPage() {
   const [search, setSearch] = useState(query);
   const debouncedSearch = useDebouncedValue(search.trim(), SEARCH_DEBOUNCE_MS);
   const [reloadKey, setReloadKey] = useState(0);
-  const [list, setList] = useState<Load<MessageList>>({ status: "loading" });
+  // While the next page loads, the previous one stays on screen.
+  const request = JSON.stringify([page, query, filter, reloadKey]);
+  const [list, settleList] = useRequestState<Load<MessageList>>(request, (previous) => ({
+    status: "loading",
+    data: previous?.data,
+  }));
 
   const updateParams = useCallback(
     (changes: Record<string, string | undefined>) => {
@@ -63,7 +69,6 @@ export function MessagesPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    setList((current) => ({ status: "loading", data: current.data }));
     adminApi
       .listMessages(
         {
@@ -75,16 +80,16 @@ export function MessagesPage() {
         },
         controller.signal,
       )
-      .then((data) => setList({ status: "ready", data }))
+      .then((data) => settleList(request, { status: "ready", data }))
       .catch((error: unknown) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
-        setList({
+        settleList(request, {
           status: "error",
           error: error instanceof ApiError ? error.message : "The messages couldn't be loaded.",
         });
       });
     return () => controller.abort();
-  }, [page, query, filter, reloadKey]);
+  }, [page, query, filter, request, settleList]);
 
   const refresh = () => {
     setReloadKey((key) => key + 1);

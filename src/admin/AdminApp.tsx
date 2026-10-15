@@ -52,6 +52,21 @@ function AdminRoutes() {
   ]);
 }
 
+/** Who is signed in, as the admin's session state (never throws). */
+async function loadSession(): Promise<Session> {
+  try {
+    const user = await fetchCurrentUser();
+    if (!user) return { status: "anonymous" };
+    if (!user.is_superuser) return { status: "forbidden", user };
+    return { status: "ready", user };
+  } catch (error) {
+    return {
+      status: "anonymous",
+      notice: error instanceof ApiError ? error.message : "The server couldn't be reached.",
+    };
+  }
+}
+
 /** `/admin/*`: session gate plus the dashboard. Lazy-loaded, so visitors never download it. */
 export default function AdminApp() {
   // Keeps the admin out of search results while it's open.
@@ -59,23 +74,11 @@ export default function AdminApp() {
   const [session, setSession] = useState<Session>({ status: "checking" });
   const dirtyRef = useRef(false);
 
-  const checkSession = useCallback(async () => {
-    try {
-      const user = await fetchCurrentUser();
-      if (!user) setSession({ status: "anonymous" });
-      else if (!user.is_superuser) setSession({ status: "forbidden", user });
-      else setSession({ status: "ready", user });
-    } catch (error) {
-      setSession({
-        status: "anonymous",
-        notice: error instanceof ApiError ? error.message : "The server couldn't be reached.",
-      });
-    }
-  }, []);
+  const checkSession = useCallback(async () => setSession(await loadSession()), []);
 
   useEffect(() => {
-    void checkSession();
-  }, [checkSession]);
+    void loadSession().then(setSession);
+  }, []);
 
   useEffect(
     () =>

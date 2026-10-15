@@ -1,4 +1,4 @@
-import type { Profile } from "../lib/cmsContracts";
+import type { Profile } from "../lib/cmsContracts.ts";
 
 /** Bundled fallback for the profile; the live site edits it from /admin. */
 export const profile: Profile = {

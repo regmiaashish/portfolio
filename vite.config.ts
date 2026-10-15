@@ -4,9 +4,9 @@ import react from "@vitejs/plugin-react";
 import { loadEnv } from "vite";
 import { configDefaults, defineConfig } from "vitest/config";
 
-import { normaliseSiteUrl } from "./src/lib/siteMeta";
-import { headersPlugin } from "./vite/headers";
-import { apiOrigin, seoPlugin } from "./vite/seo";
+import { normaliseSiteUrl } from "./src/lib/siteMeta.ts";
+import { headersPlugin } from "./vite/headers.ts";
+import { apiOrigin, seoPlugin } from "./vite/seo.ts";
 
 export default defineConfig(({ command, mode }) => {
   // The Playwright build (scripts/build-e2e.mjs) reads no .env files at all, only the variables

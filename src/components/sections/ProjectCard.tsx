@@ -38,9 +38,7 @@ export function ProjectCard({ project, headingLevel = 3, eager = false }: Projec
           // ~22rem in the 3-column grid, half the width on tablets, full on phones.
           sizes="(min-width: 72rem) 22rem, (min-width: 40rem) 45vw, 100vw"
           loading={eager ? "eager" : "lazy"}
-          // React 18 only forwards the lowercase HTML attribute (camelCase warns), and its
-          // types don't list it, so it goes in via a spread.
-          {...{ fetchpriority: eager ? "high" : "auto" }}
+          fetchPriority={eager ? "high" : "auto"}
           decoding="async"
         />
       )}

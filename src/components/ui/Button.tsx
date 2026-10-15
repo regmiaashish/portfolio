@@ -1,4 +1,4 @@
-import { type AnchorHTMLAttributes, type ButtonHTMLAttributes, forwardRef } from "react";
+import type { AnchorHTMLAttributes, ComponentPropsWithRef } from "react";
 import { Link, type LinkProps } from "react-router";
 
 import styles from "./Button.module.css";
@@ -24,21 +24,12 @@ function classes({ variant = "secondary", size = "md", iconOnly }: StyleProps, e
     .join(" ");
 }
 
-type ButtonProps = StyleProps & ButtonHTMLAttributes<HTMLButtonElement>;
+// React 19 passes `ref` as an ordinary prop, so no forwardRef is needed.
+type ButtonProps = StyleProps & ComponentPropsWithRef<"button">;
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant, size, iconOnly, className, type = "button", ...rest },
-  ref,
-) {
-  return (
-    <button
-      ref={ref}
-      type={type}
-      className={classes({ variant, size, iconOnly }, className)}
-      {...rest}
-    />
-  );
-});
+export function Button({ variant, size, iconOnly, className, type = "button", ...rest }: ButtonProps) {
+  return <button type={type} className={classes({ variant, size, iconOnly }, className)} {...rest} />;
+}
 
 type ButtonLinkProps = StyleProps & LinkProps;
 
