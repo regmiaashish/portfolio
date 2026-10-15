@@ -73,7 +73,11 @@ export function apiOrigin(apiUrl: string | undefined): string | null {
   }
 }
 
-export function seoPlugin(siteUrl: string, apiUrl?: string): Plugin {
+/**
+ * `preconnect` is false for the e2e build: the browser opens a preconnect's DNS/TCP/TLS
+ * connection itself, outside the tests' request routing.
+ */
+export function seoPlugin(siteUrl: string, apiUrl?: string, { preconnect = true } = {}): Plugin {
   return {
     name: "portfolio-seo",
     transformIndexHtml: {
@@ -82,7 +86,7 @@ export function seoPlugin(siteUrl: string, apiUrl?: string): Plugin {
         const tags = seoTags(profile, siteUrl);
         const files = Object.keys(context.bundle ?? {});
         const preloads = FIRST_SCREEN_FONTS.flatMap((pattern) => files.filter((file) => pattern.test(file)));
-        const api = apiOrigin(apiUrl);
+        const api = preconnect ? apiOrigin(apiUrl) : null;
         return [
           ...(api
             ? [

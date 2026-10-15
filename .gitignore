@@ -29,3 +29,8 @@ backup/
 .env.production
 # TypeScript incremental build info
 *.tsbuildinfo
+
+# Playwright smoke tests
+dist-e2e
+test-results
+playwright-report

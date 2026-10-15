@@ -7,7 +7,7 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   // Generated from the backend's OpenAPI schema by `npm run gen:api`; never edited by hand.
-  { ignores: ["dist", "src/lib/api-types.ts"] },
+  { ignores: ["dist", "dist-e2e", "playwright-report", "test-results", "src/lib/api-types.ts"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended, jsxA11y.flatConfigs.recommended],
     files: ["**/*.{ts,tsx}"],

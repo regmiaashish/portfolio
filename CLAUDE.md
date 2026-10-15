@@ -23,6 +23,7 @@ npm run lint           # eslint, zero warnings allowed
 npm run test           # vitest run
 npm run test:watch     # vitest
 npm run check          # typecheck + lint + test
+npm run e2e            # build dist-e2e/{site,pitch} and run the Playwright smoke tests (system Chrome)
 npm run gen:api        # regenerate src/lib/api-types.ts (backend running with ENV=dev, or OPENAPI_URL=...)
 npm run gen:brand      # regenerate public/og-image.png + icons from src/data/profile.ts (Chrome)
 ```
@@ -52,6 +53,13 @@ npm run gen:brand      # regenerate public/og-image.png + icons from src/data/pr
   (`src/hooks/usePageMeta.ts`); site-wide values come from pure helpers in `src/lib/siteMeta.ts`,
   which `vite/seo.ts` also uses to inject the static tags and JSON-LD into `index.html`. Never
   hand-edit those tags in `index.html`.
+- **Security headers** are generated into `dist/_headers` by `vite/headers.ts` at build time
+  (CSP from `VITE_API_URL` plus SHA-256 hashes of the built `index.html`'s inline scripts).
+  Never hand-write `public/_headers`. New external origins (fonts, scripts, frames, APIs) must be
+  added to `contentSecurityPolicy()`, or the e2e tests fail on the CSP violation. Only the API's
+  media route may be framed (`isEmbeddableResume`). Don't add long-lived caching for `/assets/*`
+  (the SPA fallback serves `index.html` for missing chunks). Cloudflare Rocket Loader must stay
+  off (it breaks the hash-based CSP); turning on Web Analytics needs its two origins added.
 - **Admin forms** register their dirty state with `useUnsavedChanges(dirty)`
   (`src/admin/unsaved.ts`): in-app links (`GuardedLink`), logout, reload/close and the browser
   Back button all ask before discarding changes.
@@ -81,3 +89,6 @@ npm run gen:brand      # regenerate public/og-image.png + icons from src/data/pr
   Don't switch to a data router (`createBrowserRouter`) without fixing the jsdom `AbortSignal`
   issue it causes in tests.
 - Mock `fetch` with `vi.stubGlobal`; never hit a real backend.
+- Playwright smoke tests live in `e2e/` (excluded from Vitest). `e2e/fixtures.ts` answers every
+  API request from fixtures and aborts every other request; each test fails on unmocked API
+  calls, console errors and CSP violations. Add a fixture when the site calls a new endpoint.
