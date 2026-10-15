@@ -9,7 +9,7 @@ import { Button, ButtonAnchor, ButtonLink } from "../components/ui/Button";
 import { useContent } from "../hooks/useContent";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { usePageMeta } from "../hooks/usePageMeta";
-import { RESUME_DOWNLOAD_URL } from "../lib/resume";
+import { isEmbeddableResume, RESUME_DOWNLOAD_URL } from "../lib/resume";
 import pageStyles from "./Page.module.css";
 import styles from "./ResumePage.module.css";
 
@@ -76,7 +76,8 @@ interface AvailableProps {
 function ResumeAvailable({ url, name, role, location }: AvailableProps) {
   const wide = useMediaQuery(INLINE_VIEWER_QUERY);
   const [previewRequested, setPreviewRequested] = useState(false);
-  const showViewer = wide || previewRequested;
+  const embeddable = isEmbeddableResume(url);
+  const showViewer = embeddable && (wide || previewRequested);
 
   return (
     <div className={styles.layout}>
@@ -97,7 +98,7 @@ function ResumeAvailable({ url, name, role, location }: AvailableProps) {
           <ButtonAnchor variant="secondary" href={url} target="_blank" rel="noopener noreferrer">
             Open in new tab<span className="visually-hidden"> (opens in a new tab)</span>
           </ButtonAnchor>
-          {!showViewer && (
+          {embeddable && !showViewer && (
             <Button variant="ghost" onClick={() => setPreviewRequested(true)}>
               Preview here
             </Button>
@@ -112,7 +113,9 @@ function ResumeAvailable({ url, name, role, location }: AvailableProps) {
           />
         ) : (
           <p className={styles.note}>
-            On phones and tablets the PDF opens most reliably in a new tab or after downloading.
+            {embeddable
+              ? "On phones and tablets the PDF opens most reliably in a new tab or after downloading."
+              : "This résumé is hosted elsewhere, so it opens in a new tab or downloads."}
           </p>
         )}
       </Panel>

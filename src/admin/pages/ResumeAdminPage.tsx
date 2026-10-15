@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { Button } from "../../components/ui/Button";
 import type { Profile } from "../../lib/cmsContracts";
+import { isEmbeddableResume } from "../../lib/resume";
 import { useAdminContent } from "../adminContent";
 import { adminApi } from "../api";
 import styles from "../Admin.module.css";
@@ -79,7 +80,7 @@ function ResumeForm({ profile }: { profile: Profile }) {
           error={form.errors.resume_url}
           onChange={(url) => form.update("resume_url", url)}
         />
-        {current && /^https?:\/\//.test(current) && (
+        {current && isEmbeddableResume(current) && (
           <iframe
             className={styles.resumePreview}
             src={current}

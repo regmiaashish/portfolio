@@ -1,22 +1,34 @@
-import { screen, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { contentSnapshot } from "../data/snapshot";
 import type { SiteContent } from "../lib/cmsContracts";
-import { RESUME_DOWNLOAD_URL } from "../lib/resume";
+import { isEmbeddableResume, RESUME_DOWNLOAD_URL } from "../lib/resume";
 import { jsonResponse, mockApi } from "../test/fetch";
 import { renderApp } from "../test/render";
 
-const RESUME_URL = "https://bucket.s3.ap-south-1.amazonaws.com/portfolio/resume/9b1f.pdf";
+/** Uploaded résumés are served by the API's media route (the bucket is private). */
+const RESUME_URL = "https://api.test.example/api/v1/media/portfolio/resume/9b1f.pdf";
+const EXTERNAL_RESUME_URL = "https://drive.example.com/cv.pdf";
 
-function withResume(): void {
+function withResume(url = RESUME_URL): void {
   const content: SiteContent = {
     ...contentSnapshot,
-    profile: { ...contentSnapshot.profile, resume_url: RESUME_URL },
+    profile: { ...contentSnapshot.profile, resume_url: url },
     updated_at: "2026-10-14T10:00:00Z",
   };
   mockApi({ "GET /api/v1/content": () => jsonResponse(200, content) });
+}
+
+/**
+ * Waits for the published résumé's download link. Polls a cheap selector rather than
+ * findByRole, which computes accessible names across the whole layout on every retry and is
+ * slow enough to time out on a busy machine.
+ */
+async function downloadLink(): Promise<HTMLElement> {
+  await waitFor(() => expect(document.querySelector(`a[href="${RESUME_DOWNLOAD_URL}"]`)).not.toBeNull());
+  return screen.getByRole("link", { name: "Download PDF" });
 }
 
 function robots(): string | null {
@@ -45,14 +57,15 @@ describe("/resume", () => {
     expect(await screen.findByText(/isn.t published yet/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Ask for a copy" })).toHaveAttribute("href", "/contact");
     expect(screen.queryByRole("link", { name: "Download PDF" })).not.toBeInTheDocument();
-    expect(robots()).toBe("noindex");
+    // usePageMeta sets robots in an effect, which React may run just after the text is committed.
+    await waitFor(() => expect(robots()).toBe("noindex"));
   });
 
   it("offers download and open links once a résumé is published, and is indexable", async () => {
     withResume();
     renderApp("/resume");
 
-    const download = await screen.findByRole("link", { name: "Download PDF" });
+    const download = await downloadLink();
     expect(download).toHaveAttribute("href", RESUME_DOWNLOAD_URL);
     expect(RESUME_DOWNLOAD_URL).toBe("https://api.test.example/api/v1/resume/download");
 
@@ -69,7 +82,7 @@ describe("/resume", () => {
     const user = userEvent.setup();
     renderApp("/resume");
 
-    await screen.findByRole("link", { name: "Download PDF" });
+    await downloadLink();
     expect(document.querySelector("iframe")).toBeNull();
 
     await user.click(screen.getByRole("button", { name: "Preview here" }));
@@ -89,6 +102,22 @@ describe("/resume", () => {
     expect(screen.queryByRole("button", { name: "Preview here" })).not.toBeInTheDocument();
   });
 
+  it("links to a résumé hosted elsewhere instead of framing it (the CSP only allows our media)", async () => {
+    withResume(EXTERNAL_RESUME_URL);
+    const original = window.matchMedia;
+    vi.spyOn(window, "matchMedia").mockImplementation((query: string) => {
+      const list = original(query);
+      return { ...list, matches: query.includes("pointer: fine") ? true : list.matches };
+    });
+    renderApp("/resume");
+
+    await waitFor(() => expect(document.querySelector(`a[href="${EXTERNAL_RESUME_URL}"]`)).not.toBeNull());
+    expect(screen.getByRole("link", { name: /Open in new tab/ })).toHaveAttribute("href", EXTERNAL_RESUME_URL);
+    expect(screen.getByText(/hosted elsewhere/)).toBeInTheDocument();
+    expect(document.querySelector("iframe")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Preview here" })).not.toBeInTheDocument();
+  });
+
   it("is in the main navigation, marked current on its page", () => {
     renderApp("/resume");
 
@@ -96,5 +125,16 @@ describe("/resume", () => {
     const link = within(nav).getByRole("link", { name: "Résumé" });
     expect(link).toHaveAttribute("href", "/resume");
     expect(link).toHaveAttribute("aria-current", "page");
+  });
+});
+
+describe("isEmbeddableResume", () => {
+  it("accepts only the API's media route", () => {
+    expect(isEmbeddableResume(RESUME_URL)).toBe(true);
+    expect(isEmbeddableResume("https://api.test.example/api/v1/resume/download")).toBe(false);
+    expect(isEmbeddableResume("https://api.test.example.evil.com/api/v1/media/x.pdf")).toBe(false);
+    expect(isEmbeddableResume("https://bucket.s3.amazonaws.com/portfolio/resume/9b1f.pdf")).toBe(false);
+    expect(isEmbeddableResume(EXTERNAL_RESUME_URL)).toBe(false);
+    expect(isEmbeddableResume("not a url")).toBe(false);
   });
 });

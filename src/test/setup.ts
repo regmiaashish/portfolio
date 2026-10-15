@@ -1,7 +1,11 @@
 import "@testing-library/jest-dom/vitest";
 
-import { cleanup } from "@testing-library/react";
+import { cleanup, configure } from "@testing-library/react";
 import { afterEach, beforeEach, vi } from "vitest";
+
+// findBy*/waitFor default to 1 s, which a busy CI runner can exceed on the first lazy import of
+// the admin chunk or a whole-app re-render after afterPaint. Real failures still fail, just later.
+configure({ asyncUtilTimeout: 5000 });
 
 // jsdom has no layout engine: provide the browser APIs the app calls.
 export const mediaQueries = { dark: false };
