@@ -7,6 +7,7 @@ import type { SiteContent } from "../lib/cmsContracts";
 import { isEmbeddableResume, RESUME_DOWNLOAD_URL } from "../lib/resume";
 import { jsonResponse, mockApi } from "../test/fetch";
 import { renderApp } from "../test/render";
+import { mediaQueries } from "../test/setup";
 
 /** Uploaded résumés are served by the API's media route (the bucket is private). */
 const RESUME_URL = "https://api.test.example/api/v1/media/portfolio/resume/9b1f.pdf";
@@ -91,11 +92,7 @@ describe("/resume", () => {
 
   it("on wide screens with a mouse, shows the PDF inline straight away", async () => {
     withResume();
-    const original = window.matchMedia;
-    vi.spyOn(window, "matchMedia").mockImplementation((query: string) => {
-      const list = original(query);
-      return { ...list, matches: query.includes("pointer: fine") ? true : list.matches };
-    });
+    mediaQueries.finePointer = true;
     renderApp("/resume");
 
     expect(await screen.findByTitle(/résumé \(PDF\)/)).toHaveAttribute("src", RESUME_URL);
@@ -104,11 +101,7 @@ describe("/resume", () => {
 
   it("links to a résumé hosted elsewhere instead of framing it (the CSP only allows our media)", async () => {
     withResume(EXTERNAL_RESUME_URL);
-    const original = window.matchMedia;
-    vi.spyOn(window, "matchMedia").mockImplementation((query: string) => {
-      const list = original(query);
-      return { ...list, matches: query.includes("pointer: fine") ? true : list.matches };
-    });
+    mediaQueries.finePointer = true;
     renderApp("/resume");
 
     await waitFor(() => expect(document.querySelector(`a[href="${EXTERNAL_RESUME_URL}"]`)).not.toBeNull());

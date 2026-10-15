@@ -73,7 +73,9 @@ export function ProfileEditor() {
 function ProfileForm({ profile, isNew }: { profile: Profile; isNew: boolean }) {
   const { reload } = useAdminContent();
   const [saved, setSaved] = useState(false);
-  const form = useEntityForm({
+  // alertRef is kept apart from `form`: the React Compiler treats an object a ref is read from
+  // as a ref, which would make every other form.* read during render an error.
+  const { alertRef, ...form } = useEntityForm({
     initial: toValues(profile),
     toInput,
     validate: validateProfile,
@@ -110,7 +112,7 @@ function ProfileForm({ profile, isNew }: { profile: Profile; isNew: boolean }) {
       )}
       <form className={styles.form} onSubmit={form.onSubmit} noValidate>
         {form.submitError && (
-          <p role="alert" tabIndex={-1} ref={form.alertRef} className={styles.alert}>
+          <p role="alert" tabIndex={-1} ref={alertRef} className={styles.alert}>
             {form.submitError}
           </p>
         )}

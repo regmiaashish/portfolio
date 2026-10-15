@@ -1,6 +1,6 @@
 import { act, render } from "@testing-library/react";
-import { type MutableRefObject, useRef } from "react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import type { MutableRefObject } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { UnsavedContext, useUnsavedChanges } from "./unsaved";
 
@@ -9,9 +9,9 @@ function Form({ dirty }: { dirty: boolean }) {
   return null;
 }
 
+// The admin shell's dirty flag, created fresh for each test and handed to the harness.
 let dirtyRef: MutableRefObject<boolean>;
 function Harness({ dirty }: { dirty: boolean }) {
-  dirtyRef = useRef(false);
   return (
     <UnsavedContext.Provider value={dirtyRef}>
       <Form dirty={dirty} />
@@ -20,6 +20,10 @@ function Harness({ dirty }: { dirty: boolean }) {
 }
 
 const isGuardEntry = () => Boolean((window.history.state as Record<string, unknown> | null)?.__unsavedGuard);
+
+beforeEach(() => {
+  dirtyRef = { current: false };
+});
 
 afterEach(() => {
   vi.restoreAllMocks();

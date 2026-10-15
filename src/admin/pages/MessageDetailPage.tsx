@@ -11,6 +11,7 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { deliveryDisplay, replyHref } from "../messageFormat";
 import { absoluteTime } from "../pitchFormat";
 import { useMessageStats } from "../unreadMessages";
+import { useRequestState } from "../useRequestState";
 
 type State =
   | { status: "loading" }
@@ -30,8 +31,9 @@ export function MessageDetailPage() {
   const { refresh: refreshStats } = useMessageStats();
   const backTo = `/admin/messages${(location.state as { backTo?: string } | null)?.backTo ?? ""}`;
 
-  const [state, setState] = useState<State>({ status: "loading" });
   const [reloadKey, setReloadKey] = useState(0);
+  const request = `${id}:${reloadKey}`;
+  const [state, settle, updateState] = useRequestState<State>(request, () => ({ status: "loading" }));
   const [note, setNote] = useState("");
   const [actionError, setActionError] = useState("");
   const [busy, setBusy] = useState<"read" | "retry" | null>(null);
@@ -43,18 +45,17 @@ export function MessageDetailPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    setState({ status: "loading" });
     adminApi
       .getMessage(id, controller.signal)
       .then((message) => {
         if (controller.signal.aborted) return;
-        setState({ status: "ready", message });
+        settle(request, { status: "ready", message });
         if (message.read || autoMarked.current.has(message.id)) return;
         autoMarked.current.add(message.id);
         adminApi
           .setMessageRead(message.id, true)
           .then((updated) => {
-            setState((current) => (current.status === "ready" && current.message.id === updated.id ? { status: "ready", message: updated } : current));
+            updateState((current) => (current.status === "ready" && current.message.id === updated.id ? { status: "ready", message: updated } : current));
             refreshStats();
           })
           .catch(() => {
@@ -63,11 +64,11 @@ export function MessageDetailPage() {
       })
       .catch((error: unknown) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
-        if (error instanceof ApiError && error.status === 404) setState({ status: "missing" });
-        else setState({ status: "error", error: errorText(error, "This message couldn't be loaded.") });
+        if (error instanceof ApiError && error.status === 404) settle(request, { status: "missing" });
+        else settle(request, { status: "error", error: errorText(error, "This message couldn't be loaded.") });
       });
     return () => controller.abort();
-  }, [id, reloadKey, refreshStats]);
+  }, [id, request, settle, updateState, refreshStats]);
 
   useEffect(() => {
     if (!note) return;
@@ -131,7 +132,7 @@ export function MessageDetailPage() {
     setActionError("");
     try {
       const updated = await adminApi.setMessageRead(message.id, !message.read);
-      setState({ status: "ready", message: updated });
+      settle(request, { status: "ready", message: updated });
       setNote(updated.read ? "Marked as read." : "Marked as unread.");
       refreshStats();
     } catch (error) {
@@ -146,7 +147,7 @@ export function MessageDetailPage() {
     setActionError("");
     try {
       const updated = await adminApi.retryMessage(message.id);
-      setState({ status: "ready", message: updated });
+      settle(request, { status: "ready", message: updated });
       setNote("The email is being sent again.");
       refreshStats();
     } catch (error) {

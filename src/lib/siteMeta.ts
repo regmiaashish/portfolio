@@ -2,7 +2,7 @@
  * Site-wide metadata, shared by the build (vite/seo.ts injects it into index.html) and the app
  * (usePageMeta). Pure: no `import.meta.env`, no DOM, so it runs in Node and the browser.
  */
-import type { Profile } from "./cmsContracts";
+import type { Profile } from "./cmsContracts.ts";
 
 export const DEFAULT_SITE_URL = "https://aashish-regmi.com.np";
 export const OG_IMAGE = { path: "/og-image.png", width: 1200, height: 630 } as const;

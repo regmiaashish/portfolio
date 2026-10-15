@@ -42,7 +42,12 @@ function errorText(error: PitchError): string {
 /** The live Pitch Me form, agent progress, log and streamed pitch. */
 export function PitchDemo() {
   const { theme } = useTheme();
-  const turnstile = useTurnstile(import.meta.env.VITE_TURNSTILE_SITE_KEY, theme);
+  // The container setter is kept apart: it's used as a `ref`, and the React Compiler treats any
+  // object a ref is read from as a ref, which would make every other turnstile.* read "unsafe".
+  const { containerRef: turnstileContainer, ...turnstile } = useTurnstile(
+    import.meta.env.VITE_TURNSTILE_SITE_KEY,
+    theme,
+  );
   const { state, start } = usePitchStream();
 
   const [values, setValues] = useState<Values>({ company: "", role: "" });
@@ -171,7 +176,7 @@ export function PitchDemo() {
                   disabled={running}
                 />
               </div>
-              {turnstile.enabled && <div ref={turnstile.containerRef} className={styles.turnstile} />}
+              {turnstile.enabled && <div ref={turnstileContainer} className={styles.turnstile} />}
               {formError && (
                 <p className={styles.error} role="alert">
                   {formError}

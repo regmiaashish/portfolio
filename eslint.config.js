@@ -1,5 +1,5 @@
 import js from "@eslint/js";
-import jsxA11y from "eslint-plugin-jsx-a11y";
+import jsxA11y from "eslint-plugin-jsx-a11y-x";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import globals from "globals";
@@ -9,7 +9,7 @@ export default tseslint.config(
   // Generated from the backend's OpenAPI schema by `npm run gen:api`; never edited by hand.
   { ignores: ["dist", "dist-e2e", "playwright-report", "test-results", "src/lib/api-types.ts"] },
   {
-    extends: [js.configs.recommended, ...tseslint.configs.recommended, jsxA11y.flatConfigs.recommended],
+    extends: [js.configs.recommended, ...tseslint.configs.recommended, jsxA11y.configs.recommended],
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
       ecmaVersion: 2022,

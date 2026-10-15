@@ -36,7 +36,9 @@ export function ResumeAdminPage() {
 function ResumeForm({ profile }: { profile: Profile }) {
   const { reload } = useAdminContent();
   const [saved, setSaved] = useState(false);
-  const form = useEntityForm({
+  // alertRef is kept apart from `form`: the React Compiler treats an object a ref is read from
+  // as a ref, which would make every other form.* read during render an error.
+  const { alertRef, ...form } = useEntityForm({
     initial: { resume_url: profile.resume_url ?? null },
     // Only the résumé changes; every other profile field is sent back exactly as stored.
     toInput: (values): Profile => ({ ...profile, resume_url: values.resume_url?.trim() || null }),
@@ -71,7 +73,7 @@ function ResumeForm({ profile }: { profile: Profile }) {
       )}
       <form className={styles.form} onSubmit={form.onSubmit} noValidate>
         {form.submitError && (
-          <p role="alert" tabIndex={-1} ref={form.alertRef} className={styles.alert}>
+          <p role="alert" tabIndex={-1} ref={alertRef} className={styles.alert}>
             {form.submitError}
           </p>
         )}

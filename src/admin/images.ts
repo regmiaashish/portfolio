@@ -107,7 +107,7 @@ export async function optimiseImage(
   const target = targetSize(natural);
   const mustResize = target.width !== natural.width;
 
-  let blob: Blob | null = null;
+  let blob: Blob | null;
   try {
     blob = await codec.encode(file, target, "image/webp", WEBP_QUALITY);
   } catch {

@@ -4,7 +4,7 @@ import { Icon } from "../ui/Icon";
 import { SOCIAL_ICONS } from "../ui/socialIcons";
 import { Container } from "./Container";
 import styles from "./Footer.module.css";
-import { NAV_LINKS } from "./Header";
+import { NAV_LINKS } from "./navLinks";
 
 export function Footer() {
   const { profile } = useContent().content;

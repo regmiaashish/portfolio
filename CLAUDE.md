@@ -69,6 +69,10 @@ npm run gen:brand      # regenerate public/og-image.png + icons from src/data/pr
 - **Primitives**: UI primitives in `components/ui`, layout primitives in `components/layout`;
   `components/sections` compose them; `pages/` compose sections.
 - Keep components and hooks in separate files (React Fast Refresh lint rule).
+- React Compiler lint rules (eslint-plugin-react-hooks 7): never pass a ref that lives inside a
+  returned object straight to `ref=` (`ref={form.alertRef}`): destructure it first, or the
+  compiler treats the whole object as a ref. Don't reset state synchronously at the top of a
+  fetch effect: key the result to the request with `useRequestState` (`src/admin/`).
 
 ## Accessibility rules
 

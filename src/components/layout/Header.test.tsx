@@ -45,4 +45,36 @@ describe("Header mobile menu", () => {
       "false",
     );
   });
+
+  it("stays closed on returning to the page it was opened on", async () => {
+    const user = userEvent.setup();
+    renderApp("/work");
+
+    await user.click(screen.getByRole("button", { name: "Open menu" }));
+    await user.click(screen.getByRole("link", { name: /, home$/ }));
+    const backToWork = within(screen.getByRole("main"))
+      .getAllByRole("link")
+      .find((link) => link.getAttribute("href") === "/work");
+    if (!backToWork) throw new Error("expected a link to /work on the home page");
+    await user.click(backToWork);
+
+    expect(await screen.findByRole("heading", { level: 1 })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Open menu" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+  });
+
+  it("closes when the page changes some other way (here, the logo link)", async () => {
+    const user = userEvent.setup();
+    renderApp("/work");
+
+    await user.click(screen.getByRole("button", { name: "Open menu" }));
+    await user.click(screen.getByRole("link", { name: /, home$/ }));
+
+    expect(screen.getByRole("button", { name: "Open menu" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+  });
 });

@@ -9,6 +9,7 @@ import styles from "../Admin.module.css";
 import { adminApi } from "../api";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { absoluteTime, formatDuration, formatUsd, outcomeDisplay } from "../pitchFormat";
+import { useRequestState } from "../useRequestState";
 
 type State =
   | { status: "loading" }
@@ -23,8 +24,9 @@ export function PitchDetailPage() {
   const navigate = useNavigate();
   const backTo = `/admin/pitches${(location.state as { backTo?: string } | null)?.backTo ?? ""}`;
 
-  const [state, setState] = useState<State>({ status: "loading" });
   const [reloadKey, setReloadKey] = useState(0);
+  const request = `${id}:${reloadKey}`;
+  const [state, settle] = useRequestState<State>(request, () => ({ status: "loading" }));
   const [copyNote, setCopyNote] = useState("");
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -32,17 +34,16 @@ export function PitchDetailPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    setState({ status: "loading" });
     adminApi
       .getPitch(id, controller.signal)
-      .then((run) => setState({ status: "ready", run }))
+      .then((run) => settle(request, { status: "ready", run }))
       .catch((error: unknown) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
-        if (error instanceof ApiError && error.status === 404) setState({ status: "missing" });
-        else setState({ status: "error", error: error instanceof ApiError ? error.message : "This run couldn't be loaded." });
+        if (error instanceof ApiError && error.status === 404) settle(request, { status: "missing" });
+        else settle(request, { status: "error", error: error instanceof ApiError ? error.message : "This run couldn't be loaded." });
       });
     return () => controller.abort();
-  }, [id, reloadKey]);
+  }, [id, request, settle]);
 
   useEffect(() => {
     if (!copyNote) return;

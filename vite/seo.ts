@@ -9,8 +9,8 @@
  */
 import type { HtmlTagDescriptor, Plugin } from "vite";
 
-import { profile } from "../src/data/profile";
-import type { Profile } from "../src/lib/cmsContracts";
+import { profile } from "../src/data/profile.ts";
+import type { Profile } from "../src/lib/cmsContracts.ts";
 import {
   OG_IMAGE,
   ogImageAlt,
@@ -18,7 +18,7 @@ import {
   scriptJson,
   siteDescription,
   siteTitle,
-} from "../src/lib/siteMeta";
+} from "../src/lib/siteMeta.ts";
 
 // Latin subsets only (not latin-ext/vietnamese): the first screen is English.
 const FIRST_SCREEN_FONTS = [

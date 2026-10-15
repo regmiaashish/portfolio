@@ -112,7 +112,9 @@ function ProjectForm({ project }: { project?: AdminProject }) {
   const navigate = useNavigate();
   const { reload } = useAdminContent();
   const [slugTouched, setSlugTouched] = useState(Boolean(project));
-  const form = useEntityForm({
+  // alertRef is kept apart from `form`: the React Compiler treats an object a ref is read from
+  // as a ref, which would make every other form.* read during render an error.
+  const { alertRef, ...form } = useEntityForm({
     initial: toValues(project),
     toInput,
     validate: validateProject,
@@ -133,7 +135,7 @@ function ProjectForm({ project }: { project?: AdminProject }) {
       </div>
       <form className={styles.form} onSubmit={form.onSubmit} noValidate>
         {form.submitError && (
-          <p role="alert" tabIndex={-1} ref={form.alertRef} className={styles.alert}>
+          <p role="alert" tabIndex={-1} ref={alertRef} className={styles.alert}>
             {form.submitError}
           </p>
         )}

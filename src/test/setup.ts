@@ -7,13 +7,17 @@ import { afterEach, beforeEach, vi } from "vitest";
 // the admin chunk or a whole-app re-render after afterPaint. Real failures still fail, just later.
 configure({ asyncUtilTimeout: 5000 });
 
-// jsdom has no layout engine: provide the browser APIs the app calls.
-export const mediaQueries = { dark: false };
+// jsdom has no layout engine: provide the browser APIs the app calls. Tests flip these flags to
+// emulate a dark colour scheme or a wide screen with a mouse (they reset after every test),
+// rather than spying on matchMedia: a spy would replace this shared stub for later tests.
+export const mediaQueries = { dark: false, finePointer: false };
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: vi.fn((query: string) => ({
-    matches: query.includes("dark") ? mediaQueries.dark : false,
+    matches:
+      (query.includes("dark") && mediaQueries.dark) ||
+      (query.includes("pointer: fine") && mediaQueries.finePointer),
     media: query,
     onchange: null,
     addEventListener: vi.fn(),
@@ -52,4 +56,5 @@ afterEach(() => {
   localStorage.clear();
   document.documentElement.removeAttribute("data-theme");
   mediaQueries.dark = false;
+  mediaQueries.finePointer = false;
 });

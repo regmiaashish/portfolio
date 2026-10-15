@@ -23,7 +23,7 @@ describe("Sparkline with one sample", () => {
 });
 
 describe("ProjectCard image priority", () => {
-  it("uses the lowercase fetchpriority attribute without React warnings", () => {
+  it("sets the fetchpriority attribute without React warnings", () => {
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
     const project = {
       ...contentSnapshot.projects[0],
@@ -37,7 +37,7 @@ describe("ProjectCard image priority", () => {
     );
 
     expect(screen.getByAltText("Shot")).toHaveAttribute("fetchpriority", "high");
-    expect(error.mock.calls.flat().join(" ")).not.toMatch(/fetchPriority/);
+    expect(error.mock.calls.flat().join(" ")).not.toMatch(/fetchpriority|Invalid DOM property/i);
   });
 });
 
